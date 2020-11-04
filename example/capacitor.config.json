@@ -1,0 +1,7 @@
+{
+  "appId": "com.equimaps.capacitorbackgroundgeolocationexample",
+  "appName": "example",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www"
+}

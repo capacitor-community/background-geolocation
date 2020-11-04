@@ -1,0 +1,12 @@
+{
+  "name": "capacitor-app",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "cp -R node_modules/@capacitor/core/dist/capacitor.js* www/"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^2.4.2",
+    "@capacitor/core": "^2.4.2",
+    "capacitor-background-geolocation": "../"
+  }
+}
