@@ -3,9 +3,24 @@
 <head>
   <title>BackgroundGeolocation Example</title>
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+    }
+  </style>
 </head>
 <body>
-  Hello
+  <ul id="watchers"></ul>
+
+  <button onclick="add_watcher(false)">+FG</button>
+  <button onclick="add_watcher(true)">+BG</button>
+
+  <ul id="log">
+    <li>Init</li>
+  </ul>
+
   <script src="capacitor.js"></script>
   <script src="main.js"></script>
 </body>
