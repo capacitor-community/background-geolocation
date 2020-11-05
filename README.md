@@ -29,3 +29,19 @@ public class MainActivity extends BridgeActivity {
 }
 ```
 
+Configure permissions in `AndroidManifest.xml`:
+```xml
+<manifest>
+    <application>
+        <service
+            android:name=".BackgroundGeolocationService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="location" />
+    </application>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-feature android:name="android.hardware.location.gps" />
+</manifest>
+```
