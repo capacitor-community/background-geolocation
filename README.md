@@ -49,7 +49,7 @@ npx cap update
 ```
 
 ### iOS
-Specify both the `NSLocationAlwaysUsageDescription` and `NSLocationAlwaysAndWhenInUseUsageDescription` in `Info.plist.`.
+Specify the following keys in `Info.plist.`:
 
 ```xml
 <dict>
