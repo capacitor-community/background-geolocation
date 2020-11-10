@@ -12,7 +12,7 @@ npx cap update
 Import the plugin in `MainActivity.java`:
 
 ```java
-import com.equimaps.capacitorbackgroundgeolocation.BackgroundGeolocation;
+import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -34,7 +34,7 @@ Configure permissions in `AndroidManifest.xml`:
 <manifest>
     <application>
         <service
-            android:name=".BackgroundGeolocationService"
+            android:name="com.equimaps.capacitor_background_geolocation.BackgroundGeolocationService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="location" />

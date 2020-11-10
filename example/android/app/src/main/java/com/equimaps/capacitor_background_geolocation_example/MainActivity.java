@@ -1,4 +1,4 @@
-package com.equimaps.capacitorbackgroundgeolocationexample;
+package com.equimaps.capacitor_background_geolocation_example;
 
 import android.os.Bundle;
 

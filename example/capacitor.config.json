@@ -1,5 +1,5 @@
 {
-  "appId": "com.equimaps.capacitorbackgroundgeolocationexample",
+  "appId": "com.equimaps.capacitor_background_geolocation_example",
   "appName": "example",
   "bundledWebRuntime": false,
   "npmClient": "npm",
