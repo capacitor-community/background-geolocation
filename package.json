@@ -1,6 +1,6 @@
 {
   "name": "capacitor-background-location",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Receive geolocation updates even while app is backgrounded.",
   "keywords": [
     "capacitor",
