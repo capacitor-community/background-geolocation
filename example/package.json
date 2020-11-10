@@ -7,6 +7,6 @@
   "dependencies": {
     "@capacitor/cli": "^2.4.2",
     "@capacitor/core": "^2.4.2",
-    "capacitor-background-geolocation": "../"
+    "capacitor-background-location": "../"
   }
 }
