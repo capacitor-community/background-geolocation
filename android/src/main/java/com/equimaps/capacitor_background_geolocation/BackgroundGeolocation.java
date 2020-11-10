@@ -40,6 +40,11 @@ public class BackgroundGeolocation extends Plugin {
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(PluginCall call) {
+        if (service == null) {
+            call.error("Service not running.");
+            return;
+        }
+
         call.save();
         if (!hasRequiredPermissions()) {
             callPendingPermissions = call;
