@@ -10,7 +10,7 @@ def capacitor_pods
   # Automatic Capacitor Pod dependencies, do not delete
   pod 'Capacitor', :path => '../../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../../node_modules/@capacitor/ios'
-  pod 'CapacitorBackgroundGeolocation', :path => '../../..'
+  pod 'DiachedelicCapacitorBackgroundGeolocation', :path => '../../..'
   # Do not delete
 end
 

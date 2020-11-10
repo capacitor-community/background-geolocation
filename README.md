@@ -44,7 +44,7 @@ BackgroundGeolocation.removeWatcher({id});
 
 ## Installation
 ```sh
-npm install capacitor-background-geolocation
+npm install @diachedelic/capacitor-background-geolocation
 npx cap update
 ```
 

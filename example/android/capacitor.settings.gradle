@@ -2,5 +2,5 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../../node_modules/@capacitor/android/capacitor')
 
-include ':capacitor-background-geolocation'
-project(':capacitor-background-geolocation').projectDir = new File('../node_modules/capacitor-background-geolocation/android')
+include ':diachedelic-capacitor-background-geolocation'
+project(':diachedelic-capacitor-background-geolocation').projectDir = new File('../node_modules/@diachedelic/capacitor-background-geolocation/android')
