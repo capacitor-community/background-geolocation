@@ -2,7 +2,7 @@ package com.equimaps.capacitorbackgroundgeolocationexample;
 
 import android.os.Bundle;
 
-import com.equimaps.capacitorbackgroundgeolocation.BackgroundGeolocation;
+import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 

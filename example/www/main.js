@@ -51,10 +51,8 @@ function add_watcher(background) {
     let id = Plugins.BackgroundGeolocation.addWatcher(
         {
             background,
-            notification: {
-                title: "Title",
-                message: "Message"
-            }
+            backgroundTitle: "Tracking your location.",
+            backgroundMessage: "Cancel to prevent battery drain."
         },
         function callback(location, error) {
             if (error) {

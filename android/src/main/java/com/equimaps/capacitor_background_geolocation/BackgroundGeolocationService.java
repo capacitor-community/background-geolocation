@@ -1,0 +1,215 @@
+package com.equimaps.capacitor_background_geolocation;
+
+import android.R;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+
+import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.Logger;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+
+import java.util.HashSet;
+
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+// A bound and started service that is promoted to a foreground service when
+// location updates have been requested and the main activity is stopped.
+//
+// When an activity is bound to this service, frequent location updates are
+// permitted. When the activity is removed from the foreground, the service
+// promotes itself to a foreground service, and location updates continue. When
+// the activity comes back to the foreground, the foreground service stops, and
+// the notification associated with that service is removed.
+public class BackgroundGeolocationService extends Service {
+    private static final String PKG = BackgroundGeolocationService.class.getPackage().getName();
+    static final String ACTION_BROADCAST = PKG + ".broadcast";
+    private final IBinder binder = new LocalBinder();
+
+    // Must be unique for this application.
+    private static final int NOTIFICATION_ID = 28351;
+
+    private NotificationManager notificationManager;
+
+    @Override
+    public void onCreate() {
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // Android O requires a Notification Channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(
+                    new NotificationChannel(
+                            PKG,
+                            "Location Updates",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                    )
+            );
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    private class Watcher {
+        public String id;
+        public FusedLocationProviderClient client;
+        public LocationRequest locationRequest;
+        public LocationCallback locationCallback;
+        public Boolean background;
+        public String notificationTitle;
+        public String notificationText;
+    }
+    private HashSet<Watcher> watchers = new HashSet<Watcher>();
+
+    private Watcher findBackgroundWatcher() {
+        for (Watcher watcher : watchers) {
+            if (watcher.background) {
+                return watcher;
+            }
+        }
+        return null;
+    }
+
+    private Notification getForegroundNotification() {
+        Watcher watcher = findBackgroundWatcher();
+        if (watcher == null) {
+            return null;
+        }
+
+        Notification.Builder builder = new Notification.Builder(this)
+                .setContentTitle(watcher.notificationTitle)
+                .setContentText(watcher.notificationText)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setWhen(System.currentTimeMillis());
+
+        String packageName = this.getApplicationContext().getPackageName();
+        try {
+            builder.setSmallIcon(
+                    getPackageManager().getApplicationInfo(
+                            packageName,
+                            PackageManager.GET_META_DATA
+                    ).icon
+            );
+        } catch(PackageManager.NameNotFoundException e) {
+            Logger.error("Package name not found", e);
+        }
+
+        Intent launchIntent = this.getApplicationContext().getPackageManager().getLaunchIntentForPackage(packageName);
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            builder.setContentIntent(
+                    PendingIntent.getActivity(
+                            this.getApplicationContext(),
+                            0,
+                            launchIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT
+                    )
+            );
+        }
+
+        // Set the Channel ID for Android O.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(PKG);
+        }
+
+        return builder.build();
+    }
+
+    // Handles requests from the activity.
+    public class LocalBinder extends Binder {
+        void addWatcher(
+                final String id,
+                Boolean background,
+                String notificationTitle,
+                String notificationText
+        ) {
+            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
+                    BackgroundGeolocationService.this
+            );
+            LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setMaxWaitTime(1000);
+            locationRequest.setInterval(1000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            LocationCallback callback = new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    Location location = locationResult.getLastLocation();
+                    Intent intent = new Intent(ACTION_BROADCAST);
+                    intent.putExtra("location", location);
+                    intent.putExtra("id", id);
+                    LocalBroadcastManager.getInstance(
+                            getApplicationContext()
+                    ).sendBroadcast(intent);
+                }
+                @Override
+                public void onLocationAvailability(LocationAvailability availability) {
+                    if (!availability.isLocationAvailable() && BuildConfig.DEBUG) {
+                        Logger.debug("Location not available");
+                    }
+                }
+            };
+
+            Watcher watcher = new Watcher();
+            watcher.id = id;
+            watcher.client = client;
+            watcher.locationRequest = locationRequest;
+            watcher.locationCallback = callback;
+            watcher.background = background;
+            watcher.notificationTitle = notificationTitle;
+            watcher.notificationText = notificationText;
+            watchers.add(watcher);
+
+            watcher.client.requestLocationUpdates(
+                    watcher.locationRequest,
+                    watcher.locationCallback,
+                    null
+            );
+        }
+
+        void removeWatcher(String id) {
+            for (Watcher watcher : watchers) {
+                if (watcher.id.equals(id)) {
+                    watcher.client.removeLocationUpdates(watcher.locationCallback);
+                    watchers.remove(watcher);
+                }
+            }
+        }
+
+        void handleActivityStarted() {
+            stopForeground(true);
+        }
+
+        void handleActivityStopped() {
+            Notification notification = getForegroundNotification();
+            if (notification != null) {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+        }
+
+        void stopService() {
+            BackgroundGeolocationService.this.stopSelf();
+        }
+    }
+}
