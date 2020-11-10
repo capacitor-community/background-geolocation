@@ -103,6 +103,7 @@ public class BackgroundGeolocationService extends Service {
                 if (watcher.id.equals(id)) {
                     watcher.client.removeLocationUpdates(watcher.locationCallback);
                     watchers.remove(watcher);
+                    return;
                 }
             }
         }

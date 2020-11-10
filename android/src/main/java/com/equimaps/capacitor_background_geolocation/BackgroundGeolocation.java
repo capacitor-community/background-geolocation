@@ -39,6 +39,7 @@ public class BackgroundGeolocation extends Plugin {
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(PluginCall call) {
+        call.save();
         if (!hasRequiredPermissions()) {
             callPendingPermissions = call;
             pluginRequestAllPermissions();
@@ -96,7 +97,6 @@ public class BackgroundGeolocation extends Plugin {
                 call.getCallbackId(),
                 backgroundNotification
         );
-        call.save();
     }
 
     @Override
@@ -110,6 +110,7 @@ public class BackgroundGeolocation extends Plugin {
         for(int result : grantResults) {
             if (result == PackageManager.PERMISSION_DENIED) {
                 callPendingPermissions.reject("User denied location permission", "NOT_AUTHORIZED");
+                callPendingPermissions.release(bridge);
                 return;
             }
         }

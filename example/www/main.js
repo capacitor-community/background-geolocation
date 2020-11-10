@@ -60,7 +60,7 @@ function add_watcher(background) {
         function callback(location, error) {
             if (error) {
                 if (error.code === "NOT_AUTHORIZED") {
-                    return Modals.confirm({
+                    Modals.confirm({
                         title: "Location Required",
                         message: (
                             "Example App needs your location, " +
