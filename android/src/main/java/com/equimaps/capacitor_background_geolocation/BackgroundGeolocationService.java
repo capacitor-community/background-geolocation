@@ -107,11 +107,11 @@ public class BackgroundGeolocationService extends Service {
             }
         }
 
-        void handleActivityStarted() {
+        void onActivityStarted() {
             stopForeground(true);
         }
 
-        void handleActivityStopped() {
+        void onActivityStopped() {
             for (Watcher watcher : watchers) {
                 if (watcher.backgroundNotification != null) {
                     startForeground(NOTIFICATION_ID, watcher.backgroundNotification);

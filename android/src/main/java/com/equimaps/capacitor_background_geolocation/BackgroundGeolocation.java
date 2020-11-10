@@ -13,8 +13,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
@@ -25,8 +27,6 @@ import com.getcapacitor.PluginMethod;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
-
 @NativePlugin(
         permissions={
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -35,7 +35,6 @@ import static android.content.Context.NOTIFICATION_SERVICE;
         permissionRequestCode = 28351
 )
 public class BackgroundGeolocation extends Plugin {
-    private final String PKG = BackgroundGeolocationService.class.getPackage().getName();
     private PluginCall callPendingPermissions = null;
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
@@ -58,11 +57,10 @@ public class BackgroundGeolocation extends Plugin {
                     .setPriority(Notification.PRIORITY_HIGH)
                     .setWhen(System.currentTimeMillis());
 
-            String packageName = getContext().getPackageName();
             try {
                 builder.setSmallIcon(
                         getContext().getPackageManager().getApplicationInfo(
-                                packageName,
+                                getContext().getPackageName(),
                                 PackageManager.GET_META_DATA
                         ).icon
                 );
@@ -70,7 +68,9 @@ public class BackgroundGeolocation extends Plugin {
                 Logger.error("Package name not found", e);
             }
 
-            Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(packageName);
+            Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
+                    getContext().getPackageName()
+            );
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 builder.setContentIntent(
@@ -85,7 +85,7 @@ public class BackgroundGeolocation extends Plugin {
 
             // Set the Channel ID for Android O.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder.setChannelId(PKG);
+                builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
             }
 
             backgroundNotification = builder.build();
@@ -134,7 +134,11 @@ public class BackgroundGeolocation extends Plugin {
 
     @PluginMethod()
     public void openSettings(PluginCall call) {
-        call.error("openSettings is not implemented.");
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+        intent.setData(uri);
+        getContext().startActivity(intent);
+        call.success();
     }
 
     // Sends messages to the service.
@@ -184,11 +188,11 @@ public class BackgroundGeolocation extends Plugin {
         // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getContext().getSystemService(
-                    NOTIFICATION_SERVICE
+                    Context.NOTIFICATION_SERVICE
             );
             manager.createNotificationChannel(
                     new NotificationChannel(
-                            PKG,
+                            BackgroundGeolocationService.class.getPackage().getName(),
                             "Location Updates",
                             NotificationManager.IMPORTANCE_DEFAULT
                     )
@@ -219,7 +223,7 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnStart() {
         if (service != null) {
-            service.handleActivityStarted();
+            service.onActivityStarted();
         }
         super.handleOnStart();
     }
@@ -227,7 +231,7 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnStop() {
         if (service != null) {
-            service.handleActivityStopped();
+            service.onActivityStopped();
         }
         super.handleOnStop();
     }
