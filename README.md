@@ -1,4 +1,4 @@
-# capacitor-background-location
+# capacitor-background-geolocation
 Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded.
 Tested with Capacitor v2.
 
@@ -44,7 +44,7 @@ BackgroundGeolocation.removeWatcher({id});
 
 ## Installation
 ```sh
-npm install capacitor-background-location
+npm install capacitor-background-geolocation
 npx cap update
 ```
 

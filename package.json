@@ -1,6 +1,6 @@
 {
-  "name": "capacitor-background-location",
-  "version": "0.1.1",
+  "name": "capacitor-background-geolocation",
+  "version": "0.1.0",
   "description": "Receive geolocation updates even while app is backgrounded.",
   "keywords": [
     "capacitor",
@@ -8,11 +8,11 @@
     "native"
   ],
   "bugs": {
-    "url": "https://github.com/diachedelic/capacitor-background-location/issues"
+    "url": "https://github.com/diachedelic/capacitor-background-geolocation/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/diachedelic/capacitor-background-location"
+    "url": "https://github.com/diachedelic/capacitor-background-geolocation"
   },
   "license": "MIT",
   "author": "James Diacono",
