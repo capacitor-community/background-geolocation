@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 
+import com.getcapacitor.android.BuildConfig;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
 import com.getcapacitor.NativePlugin;
