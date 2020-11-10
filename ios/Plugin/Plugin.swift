@@ -26,7 +26,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             ? kCLLocationAccuracyBestForNavigation
             : kCLLocationAccuracyBest;
             locationManager.allowsBackgroundLocationUpdates =
-                call.getBool("background") ?? false
+                call.getString("backgroundMessage") != nil
 
             if self.requestPermissions(locationManager) {
                 locationManager.startUpdatingLocation()

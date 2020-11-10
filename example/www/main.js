@@ -49,11 +49,14 @@ function log_location(location, watcher_ID) {
 
 function add_watcher(background) {
     let id = Plugins.BackgroundGeolocation.addWatcher(
-        {
-            background,
-            backgroundTitle: "Tracking your location.",
-            backgroundMessage: "Cancel to prevent battery drain."
-        },
+        (
+            background
+            ? {
+                backgroundTitle: "Tracking your location, senõr.",
+                backgroundMessage: "Cancel to prevent battery drain."
+            }
+            : {}
+        ),
         function callback(location, error) {
             if (error) {
                 if (error.code === "NOT_AUTHORIZED") {
