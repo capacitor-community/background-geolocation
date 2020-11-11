@@ -16,9 +16,9 @@ const colours = [
     "cyan"
 ];
 
-function log_for_watcher(text, time, watcher_ID) {
+function log_for_watcher(text, time, colour = "gray") {
     const li = document.createElement("li");
-    li.style.color = watcher_colours[watcher_ID];
+    li.style.color = colour;
     li.innerText = (
         String(
             Math.floor((time - started) / 1000)
@@ -30,12 +30,12 @@ function log_for_watcher(text, time, watcher_ID) {
     return container.insertBefore(li, container.firstChild);
 }
 
-function log_error(error, watcher_ID) {
+function log_error(error, colour = "gray") {
     console.error(error);
     return log_for_watcher(
         error.name + ": " + error.message,
         Date.now(),
-        watcher_ID
+        colour
     );
 }
 
@@ -43,7 +43,7 @@ function log_location(location, watcher_ID) {
     return log_for_watcher(
         location.latitude + ":" + location.longitude,
         location.time,
-        watcher_ID
+        watcher_colours[watcher_ID]
     );
 }
 
@@ -70,12 +70,12 @@ function add_watcher(background) {
                     }).then(function ({value}) {
                         if (value) {
                             BackgroundGeolocation.openSettings().catch(
-                                (error) => log_error(error, id)
+                                (error) => log_error(error, watcher_colours[id])
                             );
                         }
-                    }).catch((error) => log_error(error, id));
+                    }).catch((error) => log_error(error, watcher_colours[id]));
                 }
-                return log_error(error, id);
+                return log_error(error, watcher_colours[id]);
             }
 
             return log_location(location, id);
@@ -107,7 +107,7 @@ function add_watcher(background) {
                 delete watcher_colours[id];
             }
         ).catch(
-            (error) => log_error(error, id)
+            (error) => log_error(error, watcher_colours[id])
         );
     };
 
@@ -116,3 +116,20 @@ function add_watcher(background) {
     return container.appendChild(li);
 }
 
+function guess() {
+    return Plugins.BackgroundGeolocation.guess().then(
+        function ({location}) {
+            return (
+                location === null
+                ? log_for_watcher("null", Date.now())
+                : log_for_watcher(
+                    [
+                        location.latitude,
+                        location.longitude
+                    ].map(String).join(":"),
+                    location.time
+                )
+            );
+        }
+    ).catch(log_error);
+}

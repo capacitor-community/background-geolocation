@@ -41,6 +41,13 @@ const id = BackgroundGeolocation.addWatcher(
 // Some time later.
 BackgroundGeolocation.removeWatcher({id});
 
+// Hazard a guess at the device's location, possibly producing a stale location.
+// Calling this does not request permissions from the user, and it resolves
+// quickly. The location may be null.
+BackgroundGeolocation.guess().then(function ({location}) {
+    console.log(location);
+});
+
 // The location object.
 {
     // Longitude in degrees.

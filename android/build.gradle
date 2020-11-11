@@ -50,6 +50,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
 
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$androidxLocalbroadcastmanagerVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
 }

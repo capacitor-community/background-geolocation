@@ -3,8 +3,29 @@ import Foundation
 import UIKit
 import CoreLocation
 
+// Avoids a bewildering type warning.
+let null = Optional<Double>.none as Any
+
+func formatLocation(_ location: CLLocation) -> PluginResultData {
+    return [
+        "latitude": location.coordinate.latitude,
+        "longitude": location.coordinate.longitude,
+        "accuracy": location.horizontalAccuracy,
+        "altitude": location.altitude,
+        "altitudeAccuracy": location.verticalAccuracy,
+        "speed": location.speed < 0 ? null : location.speed,
+        "bearing": location.course < 0 ? null : location.course,
+        "time": NSNumber(
+            value: Int(
+                location.timestamp.timeIntervalSince1970 * 1000
+            )
+        ),
+    ];
+}
+
 @objc(BackgroundGeolocation)
 public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
+    let lastKnownLocationKey = "background_geolocation_last_known_location";
     var locationManagers = [String:CLLocationManager]()
 
     @objc public override func load() {
@@ -49,6 +70,23 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             }
             return call.success()
         }
+    }
+
+    @objc func guess(_ call: CAPPluginCall) {
+        if let data = UserDefaults.standard.data(
+            forKey: lastKnownLocationKey
+        ) {
+            if let location = NSKeyedUnarchiver.unarchiveObject(
+                with: data
+            ) as? CLLocation {
+                return call.success([
+                    "location": formatLocation(location)
+                ]);
+            }
+        }
+        return call.success([
+            "location": null
+        ]);
     }
 
     @objc func openSettings(_ call: CAPPluginCall) {
@@ -127,22 +165,11 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
     ) {
         if let call = getCall(manager) {
             if let location = locations.last {
-                // avoid a bewildering type warning
-                let null = Optional<Double>.none as Any
-                return call.success([
-                    "latitude": location.coordinate.latitude,
-                    "longitude": location.coordinate.longitude,
-                    "accuracy": location.horizontalAccuracy,
-                    "altitude": location.altitude,
-                    "altitudeAccuracy": location.verticalAccuracy,
-                    "speed": location.speed < 0 ? null : location.speed,
-                    "bearing": location.course < 0 ? null : location.course,
-                    "time": NSNumber(
-                        value: Int(
-                            location.timestamp.timeIntervalSince1970 * 1000
-                        )
-                    ),
-                ])
+                call.success(formatLocation(location));
+                return UserDefaults.standard.set(
+                    NSKeyedArchiver.archivedData(withRootObject: location),
+                    forKey: lastKnownLocationKey
+                );
             }
         }
     }

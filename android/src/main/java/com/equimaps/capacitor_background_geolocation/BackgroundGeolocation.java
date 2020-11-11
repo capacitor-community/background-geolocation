@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
@@ -25,7 +26,14 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 @NativePlugin(
@@ -151,6 +159,60 @@ public class BackgroundGeolocation extends Plugin {
         call.success();
     }
 
+    @PluginMethod()
+    public void guess(final PluginCall call) {
+        call.save();
+        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
+                getContext()
+        );
+        client.getLastLocation().addOnSuccessListener(
+                getActivity(),
+                new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        JSObject obj = new JSObject();
+                        obj.put("location",
+                                location == null
+                                        ? JSONObject.NULL
+                                        : formatLocation(location)
+                        );
+                        call.success(obj);
+                        call.release(bridge);
+                    }
+                }
+        ).addOnFailureListener(
+                getActivity(),
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        JSObject obj = new JSObject();
+                        obj.put("location", JSONObject.NULL);
+                        call.success(obj);
+                        call.release(bridge);
+                    }
+                }
+        );
+    }
+
+    private static JSObject formatLocation(Location location) {
+        JSObject obj = new JSObject();
+        obj.put("latitude", location.getLatitude());
+        obj.put("longitude", location.getLongitude());
+        // The docs state that all Location objects have an accuracy, but then why is there a
+        // hasAccuracy method? Better safe than sorry.
+        obj.put("accuracy", location.hasAccuracy() ? location.getAccuracy() : JSONObject.NULL);
+        obj.put("altitude", location.hasAltitude() ? location.getAltitude() : JSONObject.NULL);
+        if (Build.VERSION.SDK_INT >= 26 && location.hasVerticalAccuracy()) {
+            obj.put("altitudeAccuracy", location.getVerticalAccuracyMeters());
+        } else {
+            obj.put("altitudeAccuracy", JSONObject.NULL);
+        }
+        obj.put("speed", location.hasSpeed() ? location.getSpeed() : JSONObject.NULL);
+        obj.put("bearing", location.hasBearing() ? location.getBearing() : JSONObject.NULL);
+        obj.put("time", location.getTime());
+        return obj;
+    }
+
     // Sends messages to the service.
     private BackgroundGeolocationService.LocalBinder service = null;
 
@@ -170,26 +232,7 @@ public class BackgroundGeolocation extends Plugin {
                 }
                 return;
             }
-            JSObject obj = new JSObject();
-            obj.put("latitude", location.getLatitude());
-            obj.put("longitude", location.getLongitude());
-            // The docs state that all Location objects have an accuracy, but then why is there a
-            // hasAccuracy method? Better safe than sorry.
-            obj.put("accuracy", location.hasAccuracy() ? location.getAccuracy() : null);
-            obj.put("altitude", location.hasAltitude() ? location.getAltitude() : null);
-            obj.put(
-                "altitudeAccuracy",
-                (
-                    Build.VERSION.SDK_INT >= 26 &&
-                    location.hasVerticalAccuracy()
-                )
-                ? location.getVerticalAccuracyMeters()
-                : null
-            );
-            obj.put("speed", location.hasSpeed() ? location.getSpeed() : null);
-            obj.put("bearing", location.hasBearing() ? location.getBearing() : null);
-            obj.put("time", location.getTime());
-            call.success(obj);
+            call.success(formatLocation(location));
         }
     }
 
