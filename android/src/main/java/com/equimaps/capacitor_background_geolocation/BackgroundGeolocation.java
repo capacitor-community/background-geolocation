@@ -177,13 +177,15 @@ public class BackgroundGeolocation extends Plugin {
             // hasAccuracy method? Better safe than sorry.
             obj.put("accuracy", location.hasAccuracy() ? location.getAccuracy() : null);
             obj.put("altitude", location.hasAltitude() ? location.getAltitude() : null);
-            if (Build.VERSION.SDK_INT >= 26) {
-                obj.put("altitudeAccuracy",
-                        location.hasVerticalAccuracy()
-                                ? location.getVerticalAccuracyMeters()
-                                : null
-                );
-            }
+            obj.put(
+                "altitudeAccuracy",
+                (
+                    Build.VERSION.SDK_INT >= 26 &&
+                    location.hasVerticalAccuracy()
+                )
+                ? location.getVerticalAccuracyMeters()
+                : null
+            );
             obj.put("speed", location.hasSpeed() ? location.getSpeed() : null);
             obj.put("bearing", location.hasBearing() ? location.getBearing() : null);
             obj.put("time", location.getTime());

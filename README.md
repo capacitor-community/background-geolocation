@@ -1,6 +1,6 @@
 # capacitor-background-geolocation
 Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded.
-Tested with Capacitor v2.
+Tested with Capacitor v2. iOS and Android platforms only.
 
 ## Usage
 
@@ -40,6 +40,26 @@ const id = BackgroundGeolocation.addWatcher(
 
 // Some time later.
 BackgroundGeolocation.removeWatcher({id});
+
+// The location object.
+{
+    // Longitude in degrees.
+    longitude: 131.723423719132,
+    // Latitude in degrees.
+    latitude: -22.40106297456,
+    // Radius of horizontal uncertainty in metres, with 68% confidence.
+    accuracy: 11,
+    // Metres above sea level (or null).
+    altitude: 65,
+    // Vertical uncertainty in metres, with 68% confidence (or null).
+    altitudeAccuracy: 4,
+    // Deviation from true north in degrees (or null).
+    bearing: 159.60000610351562,
+    // Speed in metres per second (or null).
+    speed: 23.51068878173828,
+    // Time the location was produced, in milliseconds since the unix epoch.
+    time: 1562731602000
+}
 ```
 
 ## Installation
