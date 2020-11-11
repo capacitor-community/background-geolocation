@@ -116,8 +116,10 @@ function add_watcher(background) {
     return container.appendChild(li);
 }
 
-function guess() {
-    return Plugins.BackgroundGeolocation.guess().then(
+function approximate() {
+    return Plugins.BackgroundGeolocation.approximate({
+        timeout: 500
+    }).then(
         function ({location}) {
             return (
                 location === null

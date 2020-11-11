@@ -25,8 +25,8 @@ func formatLocation(_ location: CLLocation) -> PluginResultData {
 
 @objc(BackgroundGeolocation)
 public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
-    let lastKnownLocationKey = "background_geolocation_last_known_location";
     var locationManagers = [String:CLLocationManager]()
+    var guesses = [String]()
 
     @objc public override func load() {
         UIDevice.current.isBatteryMonitoringEnabled = true;
@@ -58,35 +58,39 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
     @objc func removeWatcher(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             if let callbackId = call.getString("id") {
-                if let savedCall = self.bridge.getSavedCall(callbackId) {
-                    self.bridge.releaseCall(savedCall)
-                }
-                if let locationManager = self.locationManagers[callbackId] {
-                    locationManager.stopUpdatingLocation()
-                    self.locationManagers.removeValue(forKey: callbackId)
-                }
-            } else {
-                return call.error("No callback ID")
+                self.releaseCall(callbackId);
+                return call.success()
             }
-            return call.success()
+            return call.error("No callback ID")
         }
     }
 
-    @objc func guess(_ call: CAPPluginCall) {
-        if let data = UserDefaults.standard.data(
-            forKey: lastKnownLocationKey
-        ) {
-            if let location = NSKeyedUnarchiver.unarchiveObject(
-                with: data
-            ) as? CLLocation {
-                return call.success([
-                    "location": formatLocation(location)
-                ]);
+    @objc func approximate(_ call: CAPPluginCall) {
+        call.save();
+        self.guesses.append(call.callbackId);
+
+        // CLLocationManager requires main thread
+        DispatchQueue.main.async {
+            let locationManager = CLLocationManager()
+            self.locationManagers[call.callbackId] = locationManager
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+            locationManager.requestLocation()
+
+            // Set a timeout.
+            if let milliseconds = call.getDouble("timeout") {
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + (milliseconds / 1000)
+                ) {
+                    if self.guesses.contains(call.callbackId) {
+                        call.success([
+                            "location": null
+                        ])
+                        return self.releaseCall(call.callbackId)
+                    }
+                }
             }
         }
-        return call.success([
-            "location": null
-        ]);
     }
 
     @objc func openSettings(_ call: CAPPluginCall) {
@@ -121,6 +125,19 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         return nil
     }
 
+    func releaseCall(_ callbackId: String) {
+        if let index = guesses.firstIndex(of: callbackId) {
+            guesses.remove(at: index)
+        }
+        if let savedCall = self.bridge.getSavedCall(callbackId) {
+            self.bridge.releaseCall(savedCall)
+        }
+        if let locationManager = self.locationManagers[callbackId] {
+            locationManager.stopUpdatingLocation()
+            self.locationManagers.removeValue(forKey: callbackId)
+        }
+    }
+
     // returns true if the manager can start
     func requestPermissions(_ locationManager: CLLocationManager) -> Bool {
         let status = CLLocationManager.authorizationStatus()
@@ -144,6 +161,13 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         didFailWithError error: Error
     ) {
         if let call = getCall(manager) {
+            if guesses.contains(call.callbackId) {
+                call.success([
+                    "location": null
+                ])
+                return self.releaseCall(call.callbackId)
+            }
+
             if let clErr = error as? CLError {
                 if clErr.code == CLError.locationUnknown {
                     #if DEBUG
@@ -164,12 +188,18 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         didUpdateLocations locations: [CLLocation]
     ) {
         if let call = getCall(manager) {
+            if guesses.contains(call.callbackId) {
+                call.success([
+                    "location": (
+                        locations.last == nil
+                        ? null
+                        : formatLocation(locations.last!)
+                    )
+                ])
+                return self.releaseCall(call.callbackId)
+            }
             if let location = locations.last {
-                call.success(formatLocation(location));
-                return UserDefaults.standard.set(
-                    NSKeyedArchiver.archivedData(withRootObject: location),
-                    forKey: lastKnownLocationKey
-                );
+                return call.success(formatLocation(location));
             }
         }
     }

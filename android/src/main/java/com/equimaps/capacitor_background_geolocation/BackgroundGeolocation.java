@@ -160,7 +160,7 @@ public class BackgroundGeolocation extends Plugin {
     }
 
     @PluginMethod()
-    public void guess(final PluginCall call) {
+    public void approximate(final PluginCall call) {
         call.save();
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
                 getContext()
