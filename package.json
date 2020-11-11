@@ -1,6 +1,6 @@
 {
   "name": "@diachedelic/capacitor-background-geolocation",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Receive geolocation updates even while app is backgrounded.",
   "keywords": [
     "capacitor",
