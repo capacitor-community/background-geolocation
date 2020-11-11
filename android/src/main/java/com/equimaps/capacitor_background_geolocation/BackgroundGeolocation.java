@@ -57,7 +57,10 @@ public class BackgroundGeolocation extends Plugin {
         if (backgroundMessage != null) {
             Notification.Builder builder = new Notification.Builder(getContext())
                     .setContentTitle(
-                            call.getString("backgroundTitle", "Tracking location")
+                            call.getString(
+                                "backgroundTitle",
+                                "Using your location"
+                            )
                     )
                     .setContentText(backgroundMessage)
                     .setOngoing(true)
