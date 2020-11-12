@@ -24,8 +24,9 @@ const id = BackgroundGeolocation.addWatcher(
         requestPermissions: true,
 
         // If "true", stale locations may be delivered while the device
-        // acquires a GPS lock. You are responsible for checking the "time"
-        // property. Defaults to "false".
+        // determines the current location. You are responsible for checking the
+        // "time" property. If "false", locations are guaranteed to be up to
+        // date. Defaults to "false".
         stale: false
     },
     function callback(location, error) {

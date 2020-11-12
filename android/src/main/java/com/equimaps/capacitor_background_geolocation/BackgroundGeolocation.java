@@ -47,12 +47,11 @@ public class BackgroundGeolocation extends Plugin {
     private PluginCall callPendingPermissions = null;
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
-    public void addWatcher(PluginCall call) {
+    public void addWatcher(final PluginCall call) {
         if (service == null) {
             call.error("Service not running.");
             return;
         }
-
         call.save();
         if (!hasRequiredPermissions()) {
             if (call.getBoolean("requestPermissions", true)) {
@@ -64,6 +63,21 @@ public class BackgroundGeolocation extends Plugin {
             }
         }
         callPendingPermissions = null;
+        if (call.getBoolean("stale", false)) {
+            LocationServices.getFusedLocationProviderClient(
+                    getContext()
+            ).getLastLocation().addOnSuccessListener(
+                    getActivity(),
+                    new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                call.success(formatLocation(location));
+                            }
+                        }
+                    }
+            );
+        }
         Notification backgroundNotification = null;
         String backgroundMessage = call.getString("backgroundMessage");
         if (backgroundMessage != null) {
@@ -112,7 +126,6 @@ public class BackgroundGeolocation extends Plugin {
 
             backgroundNotification = builder.build();
         }
-
         service.addWatcher(
                 call.getCallbackId(),
                 backgroundNotification
@@ -131,6 +144,7 @@ public class BackgroundGeolocation extends Plugin {
             if (result == PackageManager.PERMISSION_DENIED) {
                 callPendingPermissions.reject("User denied location permission", "NOT_AUTHORIZED");
                 callPendingPermissions.release(bridge);
+                callPendingPermissions = null;
                 return;
             }
         }
@@ -160,41 +174,6 @@ public class BackgroundGeolocation extends Plugin {
         intent.setData(uri);
         getContext().startActivity(intent);
         call.success();
-    }
-
-    @PluginMethod()
-    public void approximate(final PluginCall call) {
-        call.save();
-        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
-                getContext()
-        );
-        client.getLastLocation().addOnSuccessListener(
-                getActivity(),
-                new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        JSObject obj = new JSObject();
-                        obj.put("location",
-                                location == null
-                                        ? JSONObject.NULL
-                                        : formatLocation(location)
-                        );
-                        call.success(obj);
-                        call.release(bridge);
-                    }
-                }
-        ).addOnFailureListener(
-                getActivity(),
-                new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        JSObject obj = new JSObject();
-                        obj.put("location", JSONObject.NULL);
-                        call.success(obj);
-                        call.release(bridge);
-                    }
-                }
-        );
     }
 
     private static JSObject formatLocation(Location location) {

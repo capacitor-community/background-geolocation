@@ -26,9 +26,12 @@ func formatLocation(_ location: CLLocation) -> PluginResultData {
 class Watcher {
     let callbackId: String
     let locationManager: CLLocationManager = CLLocationManager()
+    private let created = Date()
+    private let allowStale: Bool
     private var isUpdatingLocation: Bool = false
-    init(_ id: String) {
+    init(_ id: String, stale: Bool) {
         callbackId = id
+        allowStale = stale
     }
     func ensureUpdatingLocation() {
         // Avoid unnecessary calls to startUpdatingLocation, which can
@@ -37,6 +40,12 @@ class Watcher {
             locationManager.startUpdatingLocation()
             isUpdatingLocation = true
         }
+    }
+    func isLocationValid(_ location: CLLocation) -> Bool {
+        return (
+            allowStale ||
+            location.timestamp >= created
+        )
     }
 }
 
@@ -54,7 +63,10 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
             let background = call.getString("backgroundMessage") != nil
-            let watcher = Watcher(call.callbackId)
+            let watcher = Watcher(
+                call.callbackId,
+                stale: call.getBool("stale") ?? false
+            )
             let manager = watcher.locationManager
             manager.delegate = self
             let externalPower = [
@@ -110,34 +122,6 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             return call.error("No callback ID")
         }
     }
-
-//    @objc func approximate(_ call: CAPPluginCall) {
-//        call.save();
-//        self.guesses.append(call.callbackId);
-//
-//        // CLLocationManager requires main thread
-//        DispatchQueue.main.async {
-//            let locationManager = CLLocationManager()
-//            self.locationManagers[call.callbackId] = locationManager
-//            locationManager.delegate = self
-//            locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-//            locationManager.requestLocation()
-//
-//            // Set a timeout.
-//            if let milliseconds = call.getDouble("timeout") {
-//                DispatchQueue.main.asyncAfter(
-//                    deadline: .now() + (milliseconds / 1000)
-//                ) {
-//                    if self.guesses.contains(call.callbackId) {
-//                        call.success([
-//                            "location": null
-//                        ])
-//                        return self.releaseCall(call.callbackId)
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     @objc func openSettings(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -198,8 +182,10 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             if let watcher = self.watchers.first(
                 where: { $0.locationManager == manager }
             ) {
-                if let call = self.bridge.getSavedCall(watcher.callbackId) {
-                    return call.success(formatLocation(location));
+                if watcher.isLocationValid(location) {
+                    if let call = self.bridge.getSavedCall(watcher.callbackId) {
+                        return call.success(formatLocation(location));
+                    }
                 }
             }
         }
