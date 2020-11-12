@@ -74,6 +74,27 @@ BackgroundGeolocation.removeWatcher({id});
     // Time the location was produced, in milliseconds since the unix epoch.
     time: 1562731602000
 }
+
+// If you just want the current location, try something like this. The longer
+// the timeout, the more accurate the guess will be. I wouldn't go below about
+// 100ms.
+function guess_location(callback, timeout) {
+    let last_location;
+    let id = Plugins.BackgroundGeolocation.addWatcher(
+        {
+            requestPermissions: false,
+            stale: true
+        },
+        function (location) {
+            last_location = location || undefined;
+        }
+    );
+
+    setTimeout(function () {
+        callback(last_location);
+        Plugins.BackgroundGeolocation.removeWatcher({id});
+    }, timeout);
+}
 ```
 
 ## Installation
