@@ -51,6 +51,15 @@ public class BackgroundGeolocationService extends Service {
     }
     private HashSet<Watcher> watchers = new HashSet<Watcher>();
 
+    Notification getNotification() {
+        for (Watcher watcher : watchers) {
+            if (watcher.backgroundNotification != null) {
+                return watcher.backgroundNotification;
+            }
+        }
+        return null;
+    }
+
     // Handles requests from the activity.
     public class LocalBinder extends Binder {
         void addWatcher(
@@ -104,6 +113,9 @@ public class BackgroundGeolocationService extends Service {
                 if (watcher.id.equals(id)) {
                     watcher.client.removeLocationUpdates(watcher.locationCallback);
                     watchers.remove(watcher);
+                    if (getNotification() == null) {
+                        stopForeground(true);
+                    }
                     return;
                 }
             }
@@ -127,11 +139,9 @@ public class BackgroundGeolocationService extends Service {
         }
 
         void onActivityStopped() {
-            for (Watcher watcher : watchers) {
-                if (watcher.backgroundNotification != null) {
-                    startForeground(NOTIFICATION_ID, watcher.backgroundNotification);
-                    return;
-                }
+            Notification notification = getNotification();
+            if (notification != null) {
+                startForeground(NOTIFICATION_ID, notification);
             }
         }
 
