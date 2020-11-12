@@ -147,6 +147,9 @@ public class BackgroundGeolocation extends Plugin {
             }
         }
         callPendingPermissions = null;
+        if (service != null) {
+            service.onPermissionsGranted();
+        }
     }
 
     @PluginMethod()
@@ -275,7 +278,10 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnStart() {
         if (service != null) {
-            service.onActivityStarted(stoppedWithoutPermissions && hasRequiredPermissions());
+            service.onActivityStarted();
+            if (stoppedWithoutPermissions && hasRequiredPermissions()) {
+                service.onPermissionsGranted();
+            }
         }
         super.handleOnStart();
     }
