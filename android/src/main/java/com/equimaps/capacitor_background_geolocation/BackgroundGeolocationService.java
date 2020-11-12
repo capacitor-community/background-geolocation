@@ -7,8 +7,8 @@ import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.getcapacitor.android.BuildConfig;
 import com.getcapacitor.Logger;
+import com.getcapacitor.android.BuildConfig;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;

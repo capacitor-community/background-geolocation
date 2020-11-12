@@ -19,21 +19,18 @@ import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 
-import com.getcapacitor.android.BuildConfig;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
-import com.google.android.gms.location.FusedLocationProviderClient;
+import com.getcapacitor.android.BuildConfig;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONObject;
 
-import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 @NativePlugin(
