@@ -4,7 +4,7 @@ Tested with Capacitor v2. iOS and Android platforms only.
 
 ## Usage
 
-On Android, a notification must be shown while the app is backgrounded, and so necessitates the `backgroundMessage` option. If this is not provided, location updates may cease when the app moves to the background.
+On Android, the plugin shows a notification which allows it to continue receiving location updates in the background. If the `backgroundMessage` option is not provided, the notification is not delivered and background location updates are not guaranteed.
 
 ```javascript
 import {Plugins} from "@capacitor/core";
