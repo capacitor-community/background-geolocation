@@ -45,6 +45,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 )
 public class BackgroundGeolocation extends Plugin {
     private PluginCall callPendingPermissions = null;
+    private Boolean stoppedWithoutPermissions = false;
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
@@ -58,9 +59,11 @@ public class BackgroundGeolocation extends Plugin {
                 callPendingPermissions = call;
                 pluginRequestAllPermissions();
                 return;
-            } else {
-                call.reject("Permission denied.", "NOT_AUTHORIZED");
             }
+            call.reject("Permission denied.", "NOT_AUTHORIZED");
+        }
+        if (!isLocationEnabled(getContext())) {
+            call.reject("Location services disabled.", "NOT_AUTHORIZED");
         }
         callPendingPermissions = null;
         if (call.getBoolean("stale", false)) {
@@ -176,6 +179,24 @@ public class BackgroundGeolocation extends Plugin {
         call.success();
     }
 
+    // Checks if device-wide location services are disabled
+    private static Boolean isLocationEnabled(Context context)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            return lm != null && lm.isLocationEnabled();
+        } else {
+            return  (
+                    Settings.Secure.getInt(
+                            context.getContentResolver(),
+                            Settings.Secure.LOCATION_MODE,
+                            Settings.Secure.LOCATION_MODE_OFF
+                    ) != Settings.Secure.LOCATION_MODE_OFF
+            );
+
+        }
+    }
+
     private static JSObject formatLocation(Location location) {
         JSObject obj = new JSObject();
         obj.put("latitude", location.getLatitude());
@@ -260,7 +281,7 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnStart() {
         if (service != null) {
-            service.onActivityStarted();
+            service.onActivityStarted(stoppedWithoutPermissions && hasRequiredPermissions());
         }
         super.handleOnStart();
     }
@@ -270,6 +291,7 @@ public class BackgroundGeolocation extends Plugin {
         if (service != null) {
             service.onActivityStopped();
         }
+        stoppedWithoutPermissions = !hasRequiredPermissions();
         super.handleOnStop();
     }
 

@@ -109,8 +109,20 @@ public class BackgroundGeolocationService extends Service {
             }
         }
 
-        void onActivityStarted() {
+        void onActivityStarted(Boolean permissionsGranted) {
             stopForeground(true);
+            if (permissionsGranted) {
+                // If permissions were granted while the app was in the background, for example in
+                // the Settings app, kick start the watchers.
+                for (Watcher watcher : watchers) {
+                    watcher.client.removeLocationUpdates(watcher.locationCallback);
+                    watcher.client.requestLocationUpdates(
+                            watcher.locationRequest,
+                            watcher.locationCallback,
+                            null
+                    );
+                }
+            }
         }
 
         void onActivityStopped() {

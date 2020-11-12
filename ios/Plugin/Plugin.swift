@@ -20,7 +20,7 @@ func formatLocation(_ location: CLLocation) -> PluginResultData {
                 location.timestamp.timeIntervalSince1970 * 1000
             )
         ),
-    ];
+    ]
 }
 
 class Watcher {
@@ -33,12 +33,18 @@ class Watcher {
         callbackId = id
         allowStale = stale
     }
-    func ensureUpdatingLocation() {
+    func start() {
         // Avoid unnecessary calls to startUpdatingLocation, which can
         // result in extraneous invocations of didFailWithError.
         if !isUpdatingLocation {
             locationManager.startUpdatingLocation()
             isUpdatingLocation = true
+        }
+    }
+    func stop() {
+        if isUpdatingLocation {
+            locationManager.stopUpdatingLocation()
+            isUpdatingLocation = false
         }
     }
     func isLocationValid(_ location: CLLocation) -> Bool {
@@ -54,7 +60,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
     private var watchers = [Watcher]()
 
     @objc public override func load() {
-        UIDevice.current.isBatteryMonitoringEnabled = true;
+        UIDevice.current.isBatteryMonitoringEnabled = true
     }
 
     @objc func addWatcher(_ call: CAPPluginCall) {
@@ -100,7 +106,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                     manager.requestAlwaysAuthorization()
                 }
             }
-            return watcher.ensureUpdatingLocation()
+            return watcher.start()
         }
     }
 
@@ -156,13 +162,11 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             if let call = self.bridge.getSavedCall(watcher.callbackId) {
                 if let clErr = error as? CLError {
                     if clErr.code == .locationUnknown {
-                        #if DEBUG
-                        call.error(error.localizedDescription, error)
-                        #endif
                         // This error is sometimes sent by the manager if
                         // it cannot get a fix immediately.
                         return
                     } else if (clErr.code == .denied) {
+                        watcher.stop()
                         return call.reject(
                             "Permission denied.",
                             "NOT_AUTHORIZED"
@@ -184,7 +188,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             ) {
                 if watcher.isLocationValid(location) {
                     if let call = self.bridge.getSavedCall(watcher.callbackId) {
-                        return call.success(formatLocation(location));
+                        return call.success(formatLocation(location))
                     }
                 }
             }
@@ -198,7 +202,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         if let watcher = self.watchers.first(
             where: { $0.locationManager == manager }
         ) {
-            return watcher.ensureUpdatingLocation()
+            return watcher.start()
         }
     }
 }
