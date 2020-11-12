@@ -55,14 +55,14 @@ public class BackgroundGeolocation extends Plugin {
             if (call.getBoolean("requestPermissions", true)) {
                 callPendingPermissions = call;
                 pluginRequestAllPermissions();
-                return;
+            } else {
+                call.reject("Permission denied.", "NOT_AUTHORIZED");
             }
-            call.reject("Permission denied.", "NOT_AUTHORIZED");
+        } else {
+            if (!isLocationEnabled(getContext())) {
+                call.reject("Location services disabled.", "NOT_AUTHORIZED");
+            }
         }
-        if (!isLocationEnabled(getContext())) {
-            call.reject("Location services disabled.", "NOT_AUTHORIZED");
-        }
-        callPendingPermissions = null;
         if (call.getBoolean("stale", false)) {
             LocationServices.getFusedLocationProviderClient(
                     getContext()
@@ -143,13 +143,10 @@ public class BackgroundGeolocation extends Plugin {
         for(int result : grantResults) {
             if (result == PackageManager.PERMISSION_DENIED) {
                 callPendingPermissions.reject("User denied location permission", "NOT_AUTHORIZED");
-                callPendingPermissions.release(bridge);
-                callPendingPermissions = null;
-                return;
+                break;
             }
         }
-
-        addWatcher(callPendingPermissions);
+        callPendingPermissions = null;
     }
 
     @PluginMethod()

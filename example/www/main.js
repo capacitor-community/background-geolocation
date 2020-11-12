@@ -48,7 +48,7 @@ function log_location(location, watcher_ID) {
 function add_watcher(background) {
     let id = Plugins.BackgroundGeolocation.addWatcher(
         Object.assign({
-            requestPermissions: false
+            stale: true
         }, (
             background
             ? {
