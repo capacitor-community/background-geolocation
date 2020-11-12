@@ -55,11 +55,15 @@ public class BackgroundGeolocation extends Plugin {
 
         call.save();
         if (!hasRequiredPermissions()) {
-            callPendingPermissions = call;
-            pluginRequestAllPermissions();
-            return;
+            if (call.getBoolean("requestPermissions", true)) {
+                callPendingPermissions = call;
+                pluginRequestAllPermissions();
+                return;
+            } else {
+                call.reject("Permission denied.", "NOT_AUTHORIZED");
+            }
         }
-
+        callPendingPermissions = null;
         Notification backgroundNotification = null;
         String backgroundMessage = call.getString("backgroundMessage");
         if (backgroundMessage != null) {
@@ -82,8 +86,8 @@ public class BackgroundGeolocation extends Plugin {
                                 PackageManager.GET_META_DATA
                         ).icon
                 );
-            } catch (PackageManager.NameNotFoundException e) {
-                Logger.error("Package name not found", e);
+            } catch (Exception e) {
+                Logger.error("Could not set notification icon", e);
             }
 
             Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
@@ -109,7 +113,6 @@ public class BackgroundGeolocation extends Plugin {
             backgroundNotification = builder.build();
         }
 
-        callPendingPermissions = null;
         service.addWatcher(
                 call.getCallbackId(),
                 backgroundNotification

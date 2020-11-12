@@ -22,9 +22,7 @@ function log_for_watcher(text, time, colour = "gray") {
     li.innerText = (
         String(
             Math.floor((time - started) / 1000)
-        ).padStart(3, "0") +
-        ":" +
-        text
+        ) + ":" + text
     );
     const container = document.getElementById("log");
     return container.insertBefore(li, container.firstChild);
@@ -49,14 +47,16 @@ function log_location(location, watcher_ID) {
 
 function add_watcher(background) {
     let id = Plugins.BackgroundGeolocation.addWatcher(
-        (
+        Object.assign({
+            requestPermissions: false
+        }, (
             background
             ? {
                 backgroundTitle: "Tracking your location, senõr.",
                 backgroundMessage: "Cancel to prevent battery drain."
             }
             : {}
-        ),
+        )),
         function callback(location, error) {
             if (error) {
                 if (error.code === "NOT_AUTHORIZED") {
@@ -116,22 +116,39 @@ function add_watcher(background) {
     return container.appendChild(li);
 }
 
-function approximate() {
-    return Plugins.BackgroundGeolocation.approximate({
-        timeout: 500
-    }).then(
-        function ({location}) {
-            return (
-                location === null
-                ? log_for_watcher("null", Date.now())
-                : log_for_watcher(
-                    [
-                        location.latitude,
-                        location.longitude
-                    ].map(String).join(":"),
-                    location.time
-                )
-            );
-        }
-    ).catch(log_error);
+// Produces the most accurate location possible within the specified time limit.
+function make_guess(timeout) {
+    return new Promise(function (resolve) {
+        let last_location = null;
+        let id = Plugins.BackgroundGeolocation.addWatcher(
+            {
+                requestPermissions: false,
+                stale: true
+            },
+            function callback(location) {
+                last_location = location;
+            }
+        );
+
+        setTimeout(function () {
+            resolve(last_location);
+            Plugins.BackgroundGeolocation.removeWatcher({id});
+        }, timeout);
+    });
+}
+
+function guess(timeout) {
+    return make_guess(timeout).then(function (location) {
+        return (
+            location === null
+            ? log_for_watcher("null", Date.now())
+            : log_for_watcher(
+                [
+                    location.latitude,
+                    location.longitude
+                ].map(String).join(":"),
+                location.time
+            )
+        );
+    });
 }

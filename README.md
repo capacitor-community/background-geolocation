@@ -4,16 +4,29 @@ Tested with Capacitor v2. iOS and Android platforms only.
 
 ## Usage
 
-On Android, the plugin shows a notification which allows it to continue receiving location updates in the background. If the `backgroundMessage` option is not provided, the notification is not delivered and background location updates are not guaranteed.
-
 ```javascript
 import {Plugins} from "@capacitor/core";
 const {BackgroundGeolocation, Modals} = Plugins;
 
 const id = BackgroundGeolocation.addWatcher(
     {
+        // On Android, the plugin shows a notification which allows it to
+        // continue receiving location updates in the background. If this option
+        // is undefined, the notification is not delivered and hence background
+        // location updates are not guaranteed.
+        backgroundMessage: "Cancel to prevent battery drain.",
+
+        // The title for the notification. Defaults to "Using your location".
         backgroundTitle: "Tracking You.",
-        backgroundMessage: "Cancel to prevent battery drain."
+
+        // Whether permissions should be requested from the user automatically,
+        // if they are not already granted. Defaults to "true".
+        requestPermissions: true,
+
+        // If "true", stale locations may be delivered while the device
+        // acquires a GPS lock. You are responsible for checking the "time"
+        // property. Defaults to "false".
+        stale: false
     },
     function callback(location, error) {
         if (error) {
@@ -40,16 +53,6 @@ const id = BackgroundGeolocation.addWatcher(
 
 // Some time later.
 BackgroundGeolocation.removeWatcher({id});
-
-// Make the best guess possible within the timeout specified, possibly
-// producing a stale location. Does not request permissions from the user. The
-// location may be null.
-BackgroundGeolocation.approximate({
-    // In milliseconds.
-    timeout: 1000
-}).then(function ({location}) {
-    console.log(location);
-});
 
 // The location object.
 {
