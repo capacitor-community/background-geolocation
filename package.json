@@ -1,5 +1,5 @@
 {
-  "name": "@diachedelic/capacitor-background-geolocation",
+  "name": "@capacitor-community/background-geolocation",
   "version": "0.3.4",
   "description": "Receive geolocation updates even while app is backgrounded.",
   "keywords": [
@@ -26,7 +26,7 @@
     "android/src/main/",
     "ios/Podfile*",
     "ios/Plugin/Info.plist",
-    "DiachedelicCapacitorBackgroundGeolocation.podspec"
+    "CapacitorCommunityBackgroundGeolocation.podspec"
   ],
   "devDependencies": {
     "@capacitor/android": "^2.4.2",

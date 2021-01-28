@@ -1,4 +1,4 @@
-# capacitor-background-geolocation
+# Background Geolocation
 Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded.
 Tested with Capacitor v2. iOS and Android platforms only.
 
@@ -99,7 +99,7 @@ function guess_location(callback, timeout) {
 
 ## Installation
 ```sh
-npm install @diachedelic/capacitor-background-geolocation
+npm install @capacitor-community/background-geolocation
 npx cap update
 ```
 
