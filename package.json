@@ -8,11 +8,11 @@
     "native"
   ],
   "bugs": {
-    "url": "https://github.com/diachedelic/capacitor-background-geolocation/issues"
+    "url": "https://github.com/capacitor-community/background-geolocation/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/diachedelic/capacitor-background-geolocation"
+    "url": "https://github.com/capacitor-community/background-geolocation"
   },
   "license": "MIT",
   "author": "James Diacono",
