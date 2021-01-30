@@ -27,7 +27,11 @@ const id = BackgroundGeolocation.addWatcher(
         // obtains a GPS fix. You are responsible for checking the "time"
         // property. If "false", locations are guaranteed to be up to date.
         // Defaults to "false".
-        stale: false
+        stale: false,
+
+        // The minimum number of metres between subsequent locations. Defaults
+        // to 0.
+        distanceFilter: 50
     },
     function callback(location, error) {
         if (error) {

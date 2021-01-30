@@ -64,7 +64,8 @@ public class BackgroundGeolocationService extends Service {
     public class LocalBinder extends Binder {
         void addWatcher(
                 final String id,
-                Notification backgroundNotification
+                Notification backgroundNotification,
+                float distanceFilter
         ) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
                     BackgroundGeolocationService.this
@@ -73,6 +74,7 @@ public class BackgroundGeolocationService extends Service {
             locationRequest.setMaxWaitTime(1000);
             locationRequest.setInterval(1000);
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setSmallestDisplacement(distanceFilter);
 
             LocationCallback callback = new LocationCallback(){
                 @Override

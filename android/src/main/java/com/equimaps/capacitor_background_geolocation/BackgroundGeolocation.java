@@ -128,7 +128,8 @@ public class BackgroundGeolocation extends Plugin {
         }
         service.addWatcher(
                 call.getCallbackId(),
-                backgroundNotification
+                backgroundNotification,
+                call.getFloat("distanceFilter", 0f)
         );
     }
 

@@ -19,11 +19,7 @@ const colours = [
 function log_for_watcher(text, time, colour = "gray") {
     const li = document.createElement("li");
     li.style.color = colour;
-    li.innerText = (
-        String(
-            Math.floor((time - started) / 1000)
-        ) + ":" + text
-    );
+    li.innerText = String(Math.floor((time - started) / 1000)) + ":" + text;
     const container = document.getElementById("log");
     return container.insertBefore(li, container.firstChild);
 }
@@ -55,7 +51,9 @@ function add_watcher(background) {
                 backgroundTitle: "Tracking your location, senõr.",
                 backgroundMessage: "Cancel to prevent battery drain."
             }
-            : {}
+            : {
+                distanceFilter: 10
+            }
         )),
         function callback(location, error) {
             if (error) {

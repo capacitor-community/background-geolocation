@@ -84,6 +84,9 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                 ? kCLLocationAccuracyBestForNavigation
                 : kCLLocationAccuracyBest
             )
+            manager.distanceFilter = call.getDouble(
+                "distanceFilter"
+            ) ?? kCLDistanceFilterNone;
             manager.allowsBackgroundLocationUpdates = background
             self.watchers.append(watcher)
             if call.getBool("requestPermissions") != false {
