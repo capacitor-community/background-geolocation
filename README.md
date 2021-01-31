@@ -5,11 +5,13 @@ Tested with Capacitor v2. iOS and Android platforms only.
 ## Usage
 
 ```javascript
-import {Plugins} from "@capacitor/core";
-const {BackgroundGeolocation, Modals} = Plugins;
+import { Plugins } from '@capacitor/core';
+import { BackgroundGeolocationPlugin } from '@capacitor-community/background-geolocation/dist/esm/definitions';
 
-const id = BackgroundGeolocation.addWatcher(
-    {
+// Workaround for types to work in Capacitor v2 https://github.com/ionic-team/capacitor/discussions/2593
+const BackgroundGeolocation = Plugins.BackgroundGeolocation as BackgroundGeolocationPlugin;
+
+const id = await BackgroundGeolocation.addWatcher({
         // On Android, the plugin shows a notification which allows it to
         // continue receiving location updates in the background. If this option
         // is undefined, the notification is not delivered and hence background
@@ -32,8 +34,7 @@ const id = BackgroundGeolocation.addWatcher(
         // The minimum number of metres between subsequent locations. Defaults
         // to 0.
         distanceFilter: 50
-    },
-    function callback(location, error) {
+    }, (position, error) => {
         if (error) {
             if (error.code === "NOT_AUTHORIZED") {
                 Modals.confirm({
@@ -49,10 +50,10 @@ const id = BackgroundGeolocation.addWatcher(
                     }
                 });
             }
-            return console.error(error);
+        } else {
+            // Handle location updates
+            console.log(position);
         }
-
-        return console.log(location);
     }
 );
 
