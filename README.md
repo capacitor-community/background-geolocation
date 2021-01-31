@@ -58,7 +58,7 @@ const id = await BackgroundGeolocation.addWatcher({
 );
 
 // Some time later.
-BackgroundGeolocation.removeWatcher({id});
+BackgroundGeolocation.removeWatcher({id: id});
 
 // The location object.
 {
@@ -97,7 +97,7 @@ function guess_location(callback, timeout) {
 
     setTimeout(function () {
         callback(last_location);
-        Plugins.BackgroundGeolocation.removeWatcher({id});
+        Plugins.BackgroundGeolocation.removeWatcher({id: id});
     }, timeout);
 }
 ```

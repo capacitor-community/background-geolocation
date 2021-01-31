@@ -14,7 +14,7 @@ export class BackgroundGeolocationWeb extends WebPlugin implements BackgroundGeo
     return Promise.resolve("");
   }
 
-  public removeWatcher(id: string): Promise<void> {
+  public removeWatcher(id: {id: string}): Promise<void> {
     console.log("Web not implemented", id);
     return Promise.resolve();
   }

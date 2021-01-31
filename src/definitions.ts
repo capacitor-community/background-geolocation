@@ -49,7 +49,7 @@ export interface BackgroundGeolocationPlugin {
    * Removes a watcher specified by its id.
    * @param id Watcher id from the addWatcher method.
    */
-  removeWatcher(id: string): Promise<void>;
+  removeWatcher(id: {id: string}): Promise<void>;
   /**
    * Opens location settings.
    */
