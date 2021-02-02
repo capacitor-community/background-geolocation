@@ -101,6 +101,16 @@ function guess_location(callback, timeout) {
 }
 ```
 
+### Typescript support
+
+```typescript
+// Capacitor 2.x
+import {
+    BackgroundGeolocationPlugin
+} from "@capacitor-community/background-geolocation";
+const BackgroundGeolocation = Plugins.BackgroundGeolocation as BackgroundGeolocationPlugin;
+```
+
 ## Installation
 ```sh
 npm install @capacitor-community/background-geolocation

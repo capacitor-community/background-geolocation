@@ -2,7 +2,7 @@ import {CallbackID} from "@capacitor/core/dist/esm/core-plugin-definitions";
 
 declare module "@capacitor/core" {
     interface PluginRegistry {
-        BackgroundGeolocation: BackgroundGeolocation;
+        BackgroundGeolocation: BackgroundGeolocationPlugin;
     }
 }
 
@@ -29,7 +29,7 @@ export interface CallbackError extends Error {
     code?: string;
 }
 
-export interface BackgroundGeolocation {
+export interface BackgroundGeolocationPlugin {
     addWatcher(
         options: WatcherOptions,
         callback: (
