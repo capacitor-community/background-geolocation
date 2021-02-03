@@ -10,7 +10,6 @@
   "author": "James Diacono",
   "types": "definitions.d.ts",
   "files": [
-    "dist/",
     "android/*.gradle",
     "android/proguard-rules.pro",
     "android/gradle/wrapper/gradle-wrapper.properties",
@@ -19,7 +18,8 @@
     "android/src/main/",
     "ios/Podfile*",
     "ios/Plugin/Info.plist",
-    "CapacitorCommunityBackgroundGeolocation.podspec"
+    "CapacitorCommunityBackgroundGeolocation.podspec",
+    "definitions.d.ts"
   ],
   "devDependencies": {
     "@capacitor/android": "^2.4.2",
