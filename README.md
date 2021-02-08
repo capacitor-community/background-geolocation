@@ -118,7 +118,7 @@ npx cap update
 ```
 
 ### iOS
-Specify the following keys in `Info.plist.`:
+Add the following keys to `Info.plist.`:
 
 ```xml
 <dict>
@@ -127,6 +127,10 @@ Specify the following keys in `Info.plist.`:
   <string>We need to track your location</string>
   <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
   <string>We need to track your location while your device is locked.</string>
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>location</string>
+  </array>
   ...
 </dict>
 ```
