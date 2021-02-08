@@ -202,10 +202,15 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         _ manager: CLLocationManager,
         didChangeAuthorization status: CLAuthorizationStatus
     ) {
-        if let watcher = self.watchers.first(
-            where: { $0.locationManager == manager }
-        ) {
-            return watcher.start()
+        // If this method is called before the user decides on a permission, as
+        // it is on iOS 14 when the permissions dialog is presented, we ignore
+        // it.
+        if status != .notDetermined {
+            if let watcher = self.watchers.first(
+                where: { $0.locationManager == manager }
+            ) {
+                return watcher.start()
+            }
         }
     }
 }
