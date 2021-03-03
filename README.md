@@ -18,6 +18,12 @@ const id = BackgroundGeolocation.addWatcher(
 
         // The title for the notification. Defaults to "Using your location".
         backgroundTitle: "Tracking You.",
+		
+		// The icon to be used for the notification
+		iconName: "@drawable/notification_icon",
+		
+		// The type of graphic to use for the notification
+		iconType: "drawable",
 
         // Whether permissions should be requested from the user automatically,
         // if they are not already granted. Defaults to "true".

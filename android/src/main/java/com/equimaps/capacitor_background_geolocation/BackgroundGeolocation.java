@@ -94,11 +94,10 @@ public class BackgroundGeolocation extends Plugin {
                     .setWhen(System.currentTimeMillis());
 
             try {
-                builder.setSmallIcon(
-                        getContext().getPackageManager().getApplicationInfo(
-                                getContext().getPackageName(),
-                                PackageManager.GET_META_DATA
-                        ).icon
+                String name=call.getString("iconName","@mipmap/ic_launcher");
+                String defType=call.getString("iconType","mipmap");
+                final int resourceId = getContext().getResources().getIdentifier(name, defType, getContext().getPackageName());
+                builder.setSmallIcon(resourceId);
                 );
             } catch (Exception e) {
                 Logger.error("Could not set notification icon", e);

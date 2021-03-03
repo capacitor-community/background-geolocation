@@ -10,6 +10,8 @@ export interface WatcherOptions {
     backgroundMessage?: string;
     backgroundTitle?: string;
     requestPermissions?: boolean;
+    iconName?:string;
+    iconType?:string;
     stale?: boolean;
     distanceFilter?: number;
 }
