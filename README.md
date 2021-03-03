@@ -10,21 +10,6 @@ const {BackgroundGeolocation, Modals} = Plugins;
 
 const id = BackgroundGeolocation.addWatcher(
     {
-        // On Android, the plugin shows a notification which allows it to
-        // continue receiving location updates in the background. If this option
-        // is undefined, the notification is not delivered and hence background
-        // location updates are not guaranteed.
-        backgroundMessage: "Cancel to prevent battery drain.",
-
-        // The title for the notification. Defaults to "Using your location".
-        backgroundTitle: "Tracking You.",
-		
-		// The icon to be used for the notification
-		iconName: "@drawable/notification_icon",
-		
-		// The type of graphic to use for the notification
-		iconType: "drawable",
-
         // Whether permissions should be requested from the user automatically,
         // if they are not already granted. Defaults to "true".
         requestPermissions: true,
@@ -38,6 +23,32 @@ const id = BackgroundGeolocation.addWatcher(
         // The minimum number of metres between subsequent locations. Defaults
         // to 0.
         distanceFilter: 50
+
+        // On Android, the plugin shows a notification which allows it to
+        // continue receiving location updates in the background. If this option
+        // is undefined, the notification is not delivered and hence background
+        // location updates are not guaranteed. (Android only)
+        backgroundMessage: "Cancel to prevent battery drain.",
+
+        // The title for the notification. Defaults to "Using your location". (Android only)
+        backgroundTitle: "Tracking You.",
+		
+		// The icon to be used for the notification. Defaults to '@mipmap/ic_launcher'. 
+        // Notification icons should be a white image on a transparent background (Android only)
+		iconName: "@drawable/notification_icon",
+		
+		// The type of graphic to use for the notification. Defaults to 'mipmap' (Android only)
+		iconType: "drawable",
+
+        // Sets whether sounds and vibrations should be disabled for the notifications.
+        // Once set changing these values without changing the notificationChannel
+        // below will NOT lead to changed behavior. Defaults to true (Android only)
+        silentNotifications: false,
+
+        // Name of the notification channel. It shows for for the end user
+        // in the notifications list for your app. The silentNotifcation setting
+        // above is stored per notification channel. Defaults to 'Location Updates'  (Android only)
+        notificationChannelName: 'Location Updates'
     },
     function callback(location, error) {
         if (error) {

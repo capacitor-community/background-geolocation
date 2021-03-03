@@ -43,6 +43,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 public class BackgroundGeolocation extends Plugin {
     private PluginCall callPendingPermissions = null;
     private Boolean stoppedWithoutPermissions = false;
+    private NotificationChannel notificationChannel=null;
 
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
@@ -98,7 +99,6 @@ public class BackgroundGeolocation extends Plugin {
                 String defType=call.getString("iconType","mipmap");
                 final int resourceId = getContext().getResources().getIdentifier(name, defType, getContext().getPackageName());
                 builder.setSmallIcon(resourceId);
-                );
             } catch (Exception e) {
                 Logger.error("Could not set notification icon", e);
             }
@@ -120,7 +120,10 @@ public class BackgroundGeolocation extends Plugin {
 
             // Set the Channel ID for Android O.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
+                if(notificationChannel==null){
+                    createNotificationChannel(call);
+                }
+                builder.setChannelId(notificationChannel.getId());
             }
 
             backgroundNotification = builder.build();
@@ -174,6 +177,27 @@ public class BackgroundGeolocation extends Plugin {
         intent.setData(uri);
         getContext().startActivity(intent);
         call.success();
+    }
+    //creates a notification channel taking into account the settings
+    private void createNotificationChannel(PluginCall call){
+        // Android O requires a Notification Channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        NotificationManager manager = (NotificationManager) getContext().getSystemService(
+            Context.NOTIFICATION_SERVICE
+        );
+        NotificationChannel channel = new NotificationChannel(
+            BackgroundGeolocationService.class.getPackage().getName(),
+            call.getString("notificationChannelName","Location Updates"),
+            NotificationManager.IMPORTANCE_DEFAULT
+        );
+        if(call.getBoolean("silentNotifications",false)) {
+            channel.enableLights(false);
+            channel.enableVibration(false);
+            channel.setSound(null, null);
+        }
+        manager.createNotificationChannel(channel);
+        notificationChannel=channel;
+        }
     }
 
     // Checks if device-wide location services are disabled
@@ -239,20 +263,6 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     public void load() {
         super.load();
-
-        // Android O requires a Notification Channel.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager manager = (NotificationManager) getContext().getSystemService(
-                    Context.NOTIFICATION_SERVICE
-            );
-            manager.createNotificationChannel(
-                    new NotificationChannel(
-                            BackgroundGeolocationService.class.getPackage().getName(),
-                            "Location Updates",
-                            NotificationManager.IMPORTANCE_DEFAULT
-                    )
-            );
-        }
 
         this.getContext().bindService(
                 new Intent(this.getContext(), BackgroundGeolocationService.class),

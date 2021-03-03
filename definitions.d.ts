@@ -1,4 +1,4 @@
-import {CallbackID} from "@capacitor/core/dist/esm/core-plugin-definitions";
+import { CallbackID } from "@capacitor/core/dist/esm/core-plugin-definitions";
 
 declare module "@capacitor/core" {
     interface PluginRegistry {
@@ -10,8 +10,10 @@ export interface WatcherOptions {
     backgroundMessage?: string;
     backgroundTitle?: string;
     requestPermissions?: boolean;
-    iconName?:string;
-    iconType?:string;
+    iconName?: string;
+    iconType?: string;
+    silentNotifications?: boolean;
+    notificationChannelName? :string;
     stale?: boolean;
     distanceFilter?: number;
 }
