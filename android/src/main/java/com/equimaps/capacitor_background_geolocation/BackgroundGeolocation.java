@@ -246,13 +246,15 @@ public class BackgroundGeolocation extends Plugin {
             NotificationManager manager = (NotificationManager) getContext().getSystemService(
                     Context.NOTIFICATION_SERVICE
             );
-            manager.createNotificationChannel(
-                    new NotificationChannel(
-                            BackgroundGeolocationService.class.getPackage().getName(),
-                            "Location Updates",
-                            NotificationManager.IMPORTANCE_DEFAULT
-                    )
-            );
+            NotificationChannel channel = new NotificationChannel(
+                    BackgroundGeolocationService.class.getPackage().getName(),
+                    "Location Updates",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            )
+            channel.enableLights(false);
+            channel.enableVibration(false);
+            channel.setSound(null, null);
+            manager.createNotificationChannel(channel);
         }
 
         this.getContext().bindService(
