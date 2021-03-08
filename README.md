@@ -8,7 +8,7 @@ Tested with Capacitor v2. iOS and Android platforms only.
 import {Plugins} from "@capacitor/core";
 const {BackgroundGeolocation, Modals} = Plugins;
 
-const id = BackgroundGeolocation.addWatcher(
+const watcher_id = BackgroundGeolocation.addWatcher(
     {
         // On Android, the plugin shows a notification which allows it to
         // continue receiving location updates in the background. If this option
@@ -57,7 +57,9 @@ const id = BackgroundGeolocation.addWatcher(
 );
 
 // Some time later.
-BackgroundGeolocation.removeWatcher({id});
+BackgroundGeolocation.removeWatcher({
+    id: watcher_id
+});
 
 // The location object.
 {
