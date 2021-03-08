@@ -94,11 +94,13 @@ public class BackgroundGeolocation extends Plugin {
                     .setWhen(System.currentTimeMillis());
 
             try {
+                String name = getAppString(
+                        "capacitor_background_geolocation_notification_icon",
+                        "mipmap/ic_launcher"
+                );
+                String[] parts = name.split("/");
                 builder.setSmallIcon(
-                        getContext().getPackageManager().getApplicationInfo(
-                                getContext().getPackageName(),
-                                PackageManager.GET_META_DATA
-                        ).icon
+                        getAppResourceIdentifier(parts[1], parts[0])
                 );
             } catch (Exception e) {
                 Logger.error("Could not set notification icon", e);
@@ -237,6 +239,21 @@ public class BackgroundGeolocation extends Plugin {
         }
     }
 
+    // Gets the identifier of the app's resource by name, returning 0 if not found.
+    private int getAppResourceIdentifier(String name, String defType) {
+        return getContext().getResources().getIdentifier(
+                name,
+                defType,
+                getContext().getPackageName()
+        );
+    }
+
+    // Gets a string from the app's strings.xml file, resorting to a fallback if it is not defined.
+    private String getAppString(String name, String fallback) {
+        int id = getAppResourceIdentifier(name, "string");
+        return id == 0 ? fallback : getContext().getString(id);
+    }
+
     @Override
     public void load() {
         super.load();
@@ -248,9 +265,12 @@ public class BackgroundGeolocation extends Plugin {
             );
             NotificationChannel channel = new NotificationChannel(
                     BackgroundGeolocationService.class.getPackage().getName(),
-                    "Location Updates",
+                    getAppString(
+                            "capacitor_background_geolocation_notification_channel_name",
+                            "Background Tracking"
+                    ),
                     NotificationManager.IMPORTANCE_DEFAULT
-            )
+            );
             channel.enableLights(false);
             channel.enableVibration(false);
             channel.setSound(null, null);

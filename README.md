@@ -189,3 +189,26 @@ Configure `AndroidManifest.xml`:
     <uses-feature android:name="android.hardware.location.gps" />
 </manifest>
 ```
+
+Configration specific to Android can be made in `strings.xml`:
+```xml
+<resources>
+    <!--
+        The channel name for the background notification. This will be visible
+        when the user presses & holds the notification. It defaults to
+        "Background Tracking".
+    -->
+    <string name="capacitor_background_geolocation_notification_channel_name">
+        Background Tracking
+    </string>
+
+    <!--
+        The icon to use for the background notification. Note the absence of a
+        leading "@". It defaults to "mipmap/ic_launcher", the app's launch icon.
+    -->
+    <string name="capacitor_background_geolocation_notification_icon">
+        drawable/ic_tracking
+    </string>
+</resources>
+
+```
