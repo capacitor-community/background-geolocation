@@ -8,15 +8,25 @@ Tested with Capacitor v2. iOS and Android platforms only.
 import {Plugins} from "@capacitor/core";
 const {BackgroundGeolocation, Modals} = Plugins;
 
+// To start listening for changes in the device's location, add a new watcher.
+// You do this by calling 'addWatcher' with an options object and a callback. An
+// ID is returned, which can be used to remove the watcher in the future. The
+// callback will be called every time a new location is available. Watchers can
+// not be paused, only removed. Multiple watchers may exist at the same time.
 const watcher_id = BackgroundGeolocation.addWatcher(
     {
-        // On Android, the plugin shows a notification which allows it to
-        // continue receiving location updates in the background. If this option
-        // is undefined, the notification is not delivered and hence background
-        // location updates are not guaranteed.
+        // If the "backgroundMessage" option is defined, the watcher will
+        // provide location updates whether the app is in the background or the
+        // foreground. If it is not defined, location updates are only
+        // guaranteed in the foreground. This is true on both platforms.
+
+        // On Android, a notification must be shown to continue receiving
+        // location updates in the background. This option specifies the text of
+        // that notification.
         backgroundMessage: "Cancel to prevent battery drain.",
 
-        // The title for the notification. Defaults to "Using your location".
+        // The title of the notification mentioned above. Defaults to "Using
+        // your location".
         backgroundTitle: "Tracking You.",
 
         // Whether permissions should be requested from the user automatically,
@@ -45,6 +55,10 @@ const watcher_id = BackgroundGeolocation.addWatcher(
                     )
                 }).then(function ({value}) {
                     if (value) {
+                        // It can be useful to direct the user to their device's
+                        // settings when location permissions have been denied.
+                        // The plugin provides 'openSettings' to do exactly
+                        // this.
                         BackgroundGeolocation.openSettings();
                     }
                 });
@@ -56,7 +70,8 @@ const watcher_id = BackgroundGeolocation.addWatcher(
     }
 );
 
-// Some time later.
+// When a watcher is no longer needed, it should be removed by calling
+// 'removeWatcher' with an object containing its ID.
 BackgroundGeolocation.removeWatcher({
     id: watcher_id
 });
