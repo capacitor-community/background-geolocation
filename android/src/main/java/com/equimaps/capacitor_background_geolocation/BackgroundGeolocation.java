@@ -99,6 +99,9 @@ public class BackgroundGeolocation extends Plugin {
                         "mipmap/ic_launcher"
                 );
                 String[] parts = name.split("/");
+                // It is actually necessary to set a valid icon for the notification to behave
+                // correctly when tapped. If there is no icon specified, tapping it will open the
+                // app's settings, rather than bringing the application to the foreground.
                 builder.setSmallIcon(
                         getAppResourceIdentifier(parts[1], parts[0])
                 );
