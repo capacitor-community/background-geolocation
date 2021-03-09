@@ -205,6 +205,11 @@ Configration specific to Android can be made in `strings.xml`:
     <!--
         The icon to use for the background notification. Note the absence of a
         leading "@". It defaults to "mipmap/ic_launcher", the app's launch icon.
+
+        If a raster image is used to generate the icon (as opposed to a vector
+        image), it must have a transparent background. To make sure your image
+        is compatible, select "Notification Icons" as the Icon Type when
+        creating the image asset in Android Studio.
     -->
     <string name="capacitor_background_geolocation_notification_icon">
         drawable/ic_tracking
