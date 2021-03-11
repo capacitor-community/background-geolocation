@@ -65,6 +65,8 @@ public class BackgroundGeolocationService extends Service {
         void addWatcher(
                 final String id,
                 Notification backgroundNotification,
+                long maxWaitTime,
+                long interval,
                 float distanceFilter
         ) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(

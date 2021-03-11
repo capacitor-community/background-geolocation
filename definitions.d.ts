@@ -11,6 +11,8 @@ export interface WatcherOptions {
     backgroundTitle?: string;
     requestPermissions?: boolean;
     stale?: boolean;
+    maxWaitTime?: number,
+    interval?: number,
     distanceFilter?: number;
 }
 
