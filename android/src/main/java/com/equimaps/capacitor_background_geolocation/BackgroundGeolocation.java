@@ -134,8 +134,8 @@ public class BackgroundGeolocation extends Plugin {
         service.addWatcher(
                 call.getCallbackId(),
                 backgroundNotification,
-                call.getLong("maxWaitTime", 60000),
-                call.getLong("interval", 10000),
+                call.getInt("maxWaitTime", 60000),
+                call.getInt("interval", 10000),
                 call.getFloat("distanceFilter", 0f)
         );
     }
