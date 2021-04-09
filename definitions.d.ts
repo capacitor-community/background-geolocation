@@ -36,7 +36,7 @@ export interface BackgroundGeolocationPlugin {
             position?: Location,
             error?: CallbackError
         ) => void
-    ): CallbackID;
+    ): Promise<CallbackID>;
     removeWatcher(options: {
         id: CallbackID
     }): Promise<void>;

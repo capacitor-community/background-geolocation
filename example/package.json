@@ -6,8 +6,10 @@
     "prepare": "cp -R node_modules/@capacitor/core/dist/capacitor.js* www/"
   },
   "dependencies": {
-    "@capacitor/cli": "^2.4.2",
-    "@capacitor/core": "^2.4.2",
-    "@capacitor-community/background-geolocation": "../"
+    "@capacitor-community/background-geolocation": "../",
+    "@capacitor/android": "^3.0.0-rc.0",
+    "@capacitor/cli": "^3.0.0-rc.0",
+    "@capacitor/core": "^3.0.0-rc.0",
+    "@capacitor/ios": "^3.0.0-rc.0"
   }
 }

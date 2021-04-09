@@ -1,7 +1,7 @@
 /*jslint browser, devel */
 /*global capacitorExports */
-const {Plugins} = capacitorExports;
-const {BackgroundGeolocation, Modals} = Plugins;
+const {registerPlugin} = capacitorExports;
+const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
 const started = Date.now();
 const watcher_colours = {};
@@ -42,7 +42,8 @@ function log_location(location, watcher_ID) {
 }
 
 function add_watcher(background) {
-    let id = Plugins.BackgroundGeolocation.addWatcher(
+    let id;
+    BackgroundGeolocation.addWatcher(
         Object.assign({
             stale: true
         }, (
@@ -57,68 +58,64 @@ function add_watcher(background) {
         )),
         function callback(location, error) {
             if (error) {
-                if (error.code === "NOT_AUTHORIZED") {
-                    Modals.confirm({
-                        title: "Location Required",
-                        message: (
-                            "Example App needs your location, " +
-                            "but does not have permission.\n\n" +
-                            "Open settings now?"
-                        )
-                    }).then(function ({value}) {
-                        if (value) {
-                            BackgroundGeolocation.openSettings().catch(
-                                (error) => log_error(error, watcher_colours[id])
-                            );
-                        }
-                    }).catch((error) => log_error(error, watcher_colours[id]));
+                if (
+                    error.code === "NOT_AUTHORIZED" &&
+                    window.confirm(
+                        "This app needs your location, " +
+                        "but does not have permission.\n\n" +
+                        "Open settings now?"
+                    )
+                ) {
+                    BackgroundGeolocation.openSettings();
                 }
                 return log_error(error, watcher_colours[id]);
             }
-
             return log_location(location, id);
         }
-    );
+    ).then(function retain_the_watcher_id(the_id) {
+        id = the_id;
 
-    const watcher_nr = Object.keys(watcher_colours).length;
-    watcher_colours[id] = colours[watcher_nr];
+        const watcher_nr = Object.keys(watcher_colours).length;
+        watcher_colours[id] = colours[watcher_nr];
 
-    const container = document.getElementById("watchers");
-    const li = document.createElement("li");
-    li.style.backgroundColor = watcher_colours[id];
-    li.innerText = (
-        background
-        ? "BG"
-        : "FG"
-    );
-
-    const remove_btn = document.createElement("button");
-    remove_btn.innerText = "Remove";
-    remove_btn.onclick = function () {
-        return Plugins.BackgroundGeolocation.removeWatcher({id}).then(
-            function () {
-                container.removeChild(
-                    container.children.item(
-                        Object.keys(watcher_colours).indexOf(id)
-                    )
-                );
-                delete watcher_colours[id];
-            }
-        ).catch(
-            (error) => log_error(error, watcher_colours[id])
+        const container = document.getElementById("watchers");
+        const li = document.createElement("li");
+        li.style.backgroundColor = watcher_colours[id];
+        li.innerText = (
+            background
+            ? "BG"
+            : "FG"
         );
-    };
 
-    li.appendChild(remove_btn);
+        const remove_btn = document.createElement("button");
+        remove_btn.innerText = "Remove";
+        remove_btn.onclick = function () {
+            return BackgroundGeolocation.removeWatcher({id}).then(
+                function () {
+                    container.removeChild(
+                        container.children.item(
+                            Object.keys(watcher_colours).indexOf(id)
+                        )
+                    );
+                    delete watcher_colours[id];
+                }
+            ).catch(
+                (error) => log_error(error, watcher_colours[id])
+            );
+        };
 
-    return container.appendChild(li);
+        li.appendChild(remove_btn);
+
+        return container.appendChild(li);
+    });
 }
 
 // Produces the most accurate location possible within the specified time limit.
 function make_guess(timeout) {
     return new Promise(function (resolve) {
         let last_location = null;
-        let id = Plugins.BackgroundGeolocation.addWatcher(
+        let id;
+        BackgroundGeolocation.addWatcher(
             {
                 requestPermissions: false,
                 stale: true
@@ -126,11 +123,13 @@ function make_guess(timeout) {
             function callback(location) {
                 last_location = location;
             }
-        );
+        ).then(function retain_callback_id(the_id) {
+            id = the_id;
+        });
 
         setTimeout(function () {
             resolve(last_location);
-            Plugins.BackgroundGeolocation.removeWatcher({id});
+            BackgroundGeolocation.removeWatcher({id});
         }, timeout);
     });
 }

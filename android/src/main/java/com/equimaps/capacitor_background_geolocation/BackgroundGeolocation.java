@@ -47,10 +47,10 @@ public class BackgroundGeolocation extends Plugin {
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
         if (service == null) {
-            call.error("Service not running.");
+            call.reject("Service not running.");
             return;
         }
-        call.save();
+        call.setKeepAlive(true);
         if (!hasRequiredPermissions()) {
             if (call.getBoolean("requestPermissions", true)) {
                 callPendingPermissions = call;
@@ -72,7 +72,7 @@ public class BackgroundGeolocation extends Plugin {
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
-                                call.success(formatLocation(location));
+                                call.resolve(formatLocation(location));
                             }
                         }
                     }
@@ -162,7 +162,7 @@ public class BackgroundGeolocation extends Plugin {
     public void removeWatcher(PluginCall call) {
         String callbackId = call.getString("id");
         if (callbackId == null) {
-            call.error("Missing id.");
+            call.reject("Missing id.");
             return;
         }
         service.removeWatcher(callbackId);
@@ -170,7 +170,7 @@ public class BackgroundGeolocation extends Plugin {
         if (savedCall != null) {
             savedCall.release(bridge);
         }
-        call.success();
+        call.resolve();
     }
 
     @PluginMethod()
@@ -179,7 +179,7 @@ public class BackgroundGeolocation extends Plugin {
         Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
         intent.setData(uri);
         getContext().startActivity(intent);
-        call.success();
+        call.resolve();
     }
 
     // Checks if device-wide location services are disabled

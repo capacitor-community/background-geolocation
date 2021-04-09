@@ -1,19 +1,19 @@
 # Background Geolocation
-Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded.
-Tested with Capacitor v2. iOS and Android platforms only.
+A Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded. Only iOS and Android platforms are supported.
 
 ## Usage
 
 ```javascript
-import {Plugins} from "@capacitor/core";
-const {BackgroundGeolocation, Modals} = Plugins;
+import {registerPlugin} from "@capacitor/core";
+const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
 // To start listening for changes in the device's location, add a new watcher.
-// You do this by calling 'addWatcher' with an options object and a callback. An
-// ID is returned, which can be used to remove the watcher in the future. The
-// callback will be called every time a new location is available. Watchers can
-// not be paused, only removed. Multiple watchers may exist at the same time.
-const watcher_id = BackgroundGeolocation.addWatcher(
+// You do this by calling 'addWatcher' with an options object and a callback. A
+// Promise is returned, which resolves to the callback ID used to remove the
+// watcher in the future. The callback will be called every time a new location
+// is available. Watchers can not be paused, only removed. Multiple watchers may
+// exist simultaneously.
+BackgroundGeolocation.addWatcher(
     {
         // If the "backgroundMessage" option is defined, the watcher will
         // provide location updates whether the app is in the background or the
@@ -46,34 +46,29 @@ const watcher_id = BackgroundGeolocation.addWatcher(
     function callback(location, error) {
         if (error) {
             if (error.code === "NOT_AUTHORIZED") {
-                Modals.confirm({
-                    title: "Location Required",
-                    message: (
-                        "This app needs your location, " +
-                        "but does not have permission.\n\n" +
-                        "Open settings now?"
-                    )
-                }).then(function ({value}) {
-                    if (value) {
-                        // It can be useful to direct the user to their device's
-                        // settings when location permissions have been denied.
-                        // The plugin provides 'openSettings' to do exactly
-                        // this.
-                        BackgroundGeolocation.openSettings();
-                    }
-                });
+                if (window.confirm(
+                    "This app needs your location, " +
+                    "but does not have permission.\n\n" +
+                    "Open settings now?"
+                )) {
+                    // It can be useful to direct the user to their device's
+                    // settings when location permissions have been denied. The
+                    // plugin provides the 'openSettings' method to do exactly
+                    // this.
+                    BackgroundGeolocation.openSettings();
+                }
             }
             return console.error(error);
         }
 
         return console.log(location);
     }
-);
-
-// When a watcher is no longer needed, it should be removed by calling
-// 'removeWatcher' with an object containing its ID.
-BackgroundGeolocation.removeWatcher({
-    id: watcher_id
+).then(function after_the_watcher_has_been_added(watcher_id) {
+    // When a watcher is no longer needed, it should be removed by calling
+    // 'removeWatcher' with an object containing its ID.
+    BackgroundGeolocation.removeWatcher({
+        id: watcher_id
+    });
 });
 
 // The location object.
@@ -101,7 +96,7 @@ BackgroundGeolocation.removeWatcher({
 // 100ms.
 function guess_location(callback, timeout) {
     let last_location;
-    let id = Plugins.BackgroundGeolocation.addWatcher(
+    BackgroundGeolocation.addWatcher(
         {
             requestPermissions: false,
             stale: true
@@ -109,26 +104,36 @@ function guess_location(callback, timeout) {
         function (location) {
             last_location = location || undefined;
         }
-    );
-
-    setTimeout(function () {
-        callback(last_location);
-        Plugins.BackgroundGeolocation.removeWatcher({id});
-    }, timeout);
+    ).then(function (id) {
+        setTimeout(function () {
+            callback(last_location);
+            Plugins.BackgroundGeolocation.removeWatcher({id});
+        }, timeout);
+    });
 }
 ```
 
 ### Typescript support
 
 ```typescript
-// Capacitor 2.x
-import {
-    BackgroundGeolocationPlugin
-} from "@capacitor-community/background-geolocation";
+// Capacitor v3
+import {BackgroundGeolocationPlugin} from "@capacitor-community/background-geolocation";
+const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
+
+// Capacitor v2
+import {BackgroundGeolocationPlugin} from "@capacitor-community/background-geolocation";
 const BackgroundGeolocation = Plugins.BackgroundGeolocation as BackgroundGeolocationPlugin;
 ```
 
 ## Installation
+
+Different versions of the plugin support different versions of Capacitor:
+
+| Capacitor  | Plugin |
+|------------|--------|
+| v2         | v0.3   |
+| v3         | v1     |
+
 ```sh
 npm install @capacitor-community/background-geolocation
 npx cap update
@@ -153,7 +158,7 @@ Add the following keys to `Info.plist.`:
 ```
 
 ### Android
-Import the plugin in `MainActivity.java`:
+If you are using Capacitor v2, you must import the plugin in `MainActivity.java`. This step is __not__ required for Capacitor v3.
 
 ```java
 import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
@@ -217,3 +222,11 @@ Configration specific to Android can be made in `strings.xml`:
 </resources>
 
 ```
+
+## Changelog
+
+### v1.0.0
+- BREAKING: `addWatcher` now returns a Promise which resolves to the callback ID, rather than the callback ID itself.
+- BREAKING: The plugin is imported via Capacitor's `registerPlugin` function, rather than from the `Plugins` object.
+- Adds support for Capacitor v3
+- Drops support for iOS v11

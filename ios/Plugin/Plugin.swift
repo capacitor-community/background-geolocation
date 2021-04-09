@@ -6,7 +6,7 @@ import CoreLocation
 // Avoids a bewildering type warning.
 let null = Optional<Double>.none as Any
 
-func formatLocation(_ location: CLLocation) -> PluginResultData {
+func formatLocation(_ location: CLLocation) -> PluginCallResultData {
     return [
         "latitude": location.coordinate.latitude,
         "longitude": location.coordinate.longitude,
@@ -64,7 +64,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
     }
 
     @objc func addWatcher(_ call: CAPPluginCall) {
-        call.save()
+        call.keepAlive = true
         
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
@@ -123,12 +123,12 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                     self.watchers[index].locationManager.stopUpdatingLocation()
                     self.watchers.remove(at: index)
                 }
-                if let savedCall = self.bridge.getSavedCall(callbackId) {
-                    self.bridge.releaseCall(savedCall)
+                if let savedCall = self.bridge?.savedCall(withID: callbackId) {
+                    self.bridge?.releaseCall(savedCall)
                 }
-                return call.success()
+                return call.resolve()
             }
-            return call.error("No callback ID")
+            return call.reject("No callback ID")
         }
     }
 
@@ -137,20 +137,20 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             guard let settingsUrl = URL(
                 string: UIApplication.openSettingsURLString
             ) else {
-                return call.error("No link to settings available")
+                return call.reject("No link to settings available")
             }
 
             if UIApplication.shared.canOpenURL(settingsUrl) {
                 UIApplication.shared.open(settingsUrl, completionHandler: {
                     (success) in
                     if (success) {
-                        return call.success()
+                        return call.resolve()
                     } else {
-                        return call.error("Failed to open settings")
+                        return call.reject("Failed to open settings")
                     }
                 })
             } else {
-                return call.error("Cannot open settings")
+                return call.reject("Cannot open settings")
             }
         }
     }
@@ -162,7 +162,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         if let watcher = self.watchers.first(
             where: { $0.locationManager == manager }
         ) {
-            if let call = self.bridge.getSavedCall(watcher.callbackId) {
+            if let call = self.bridge?.savedCall(withID: watcher.callbackId) {
                 if let clErr = error as? CLError {
                     if clErr.code == .locationUnknown {
                         // This error is sometimes sent by the manager if
@@ -176,7 +176,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                         )
                     }
                 }
-                return call.error(error.localizedDescription, error)
+                return call.reject(error.localizedDescription, nil, error)
             }
         }
     }
@@ -190,8 +190,8 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                 where: { $0.locationManager == manager }
             ) {
                 if watcher.isLocationValid(location) {
-                    if let call = self.bridge.getSavedCall(watcher.callbackId) {
-                        return call.success(formatLocation(location))
+                    if let call = self.bridge?.savedCall(withID: watcher.callbackId) {
+                        return call.resolve(formatLocation(location))
                     }
                 }
             }
