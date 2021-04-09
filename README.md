@@ -206,5 +206,5 @@ Configration specific to Android can be made in `strings.xml`:
 ### v1.0.0
 - BREAKING: `addWatcher` now returns a Promise which resolves to the callback ID, rather than the callback ID itself.
 - BREAKING: The plugin is imported via Capacitor's `registerPlugin` function, rather than from the `Plugins` object.
-- Adds support for Capacitor v3
-- Drops support for iOS v11
+- BREAKING: Drops support for iOS v11 and Capacitor v2.
+- Adds support for Capacitor v3.
