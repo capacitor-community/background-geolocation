@@ -116,13 +116,8 @@ function guess_location(callback, timeout) {
 ### Typescript support
 
 ```typescript
-// Capacitor v3
 import {BackgroundGeolocationPlugin} from "@capacitor-community/background-geolocation";
 const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
-
-// Capacitor v2
-import {BackgroundGeolocationPlugin} from "@capacitor-community/background-geolocation";
-const BackgroundGeolocation = Plugins.BackgroundGeolocation as BackgroundGeolocationPlugin;
 ```
 
 ## Installation
@@ -133,6 +128,8 @@ Different versions of the plugin support different versions of Capacitor:
 |------------|--------|
 | v2         | v0.3   |
 | v3         | v1     |
+
+Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
 ```sh
 npm install @capacitor-community/background-geolocation
@@ -158,25 +155,6 @@ Add the following keys to `Info.plist.`:
 ```
 
 ### Android
-If you are using Capacitor v2, you must import the plugin in `MainActivity.java`. This step is __not__ required for Capacitor v3.
-
-```java
-import com.equimaps.capacitor_background_geolocation.BackgroundGeolocation;
-
-public class MainActivity extends BridgeActivity {
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    // Initializes the Bridge
-    this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
-      // Additional plugins you've installed go here
-      // Ex: add(TotallyAwesomePlugin.class);
-      add(BackgroundGeolocation.class);
-    }});
-  }
-}
-```
 
 Configure `AndroidManifest.xml`:
 ```xml
