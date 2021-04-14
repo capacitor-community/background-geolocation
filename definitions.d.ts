@@ -1,11 +1,3 @@
-import {CallbackID} from "@capacitor/core/dist/esm/core-plugin-definitions";
-
-declare module "@capacitor/core" {
-    interface PluginRegistry {
-        BackgroundGeolocation: BackgroundGeolocationPlugin;
-    }
-}
-
 export interface WatcherOptions {
     backgroundMessage?: string;
     backgroundTitle?: string;
@@ -36,9 +28,9 @@ export interface BackgroundGeolocationPlugin {
             position?: Location,
             error?: CallbackError
         ) => void
-    ): Promise<CallbackID>;
+    ): Promise<string>;
     removeWatcher(options: {
-        id: CallbackID
+        id: string
     }): Promise<void>;
     openSettings(): Promise<void>;
 }
