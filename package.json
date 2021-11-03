@@ -10,7 +10,8 @@
   "author": "James Diacono",
   "types": "definitions.d.ts",
   "files": [
-    "android/*.gradle",
+    "android/build.gradle",
+    "android/settings.gradle",
     "android/proguard-rules.pro",
     "android/gradle/wrapper/gradle-wrapper.properties",
     "android/gradle.properties",
