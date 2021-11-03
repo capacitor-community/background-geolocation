@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "../",
-    "@capacitor/android": "^3.0.0-rc.0",
-    "@capacitor/cli": "^3.0.0-rc.0",
-    "@capacitor/core": "^3.0.0-rc.0",
-    "@capacitor/ios": "^3.0.0-rc.0"
+    "@capacitor/android": "^3.1.1",
+    "@capacitor/cli": "^3.1.1",
+    "@capacitor/core": "^3.1.1",
+    "@capacitor/ios": "^3.1.1"
   }
 }
