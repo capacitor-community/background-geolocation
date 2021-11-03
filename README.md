@@ -167,6 +167,7 @@ Configure `AndroidManifest.xml`:
             android:foregroundServiceType="location" />
     </application>
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.location.gps" />
@@ -202,6 +203,9 @@ Configration specific to Android can be made in `strings.xml`:
 ```
 
 ## Changelog
+
+### v1.0.4
+- Added the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
 
 ### v1.0.0
 - BREAKING: `addWatcher` now returns a Promise which resolves to the callback ID, rather than the callback ID itself.
