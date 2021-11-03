@@ -1,6 +1,6 @@
 {
   "name": "@capacitor-community/background-geolocation",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "Receive geolocation updates even while app is backgrounded.",
   "repository": {
     "type": "git",
