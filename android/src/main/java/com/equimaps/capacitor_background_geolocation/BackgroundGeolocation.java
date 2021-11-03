@@ -35,6 +35,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 @NativePlugin(
         permissions={
+                // As of API level 31, the coarse permission MUST accompany
+                // the fine permission.
+                Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION
         },
         // A random integer which is hopefully unique to this plugin.

@@ -184,6 +184,7 @@ Configure `AndroidManifest.xml`:
             android:foregroundServiceType="location" />
     </application>
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.location.gps" />
@@ -217,3 +218,8 @@ Configration specific to Android can be made in `strings.xml`:
 </resources>
 
 ```
+
+## Changelog
+
+### v0.3.12
+- Added the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
