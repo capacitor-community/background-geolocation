@@ -122,7 +122,7 @@ public class BackgroundGeolocation extends Plugin {
                                 getContext(),
                                 0,
                                 launchIntent,
-                                PendingIntent.FLAG_CANCEL_CURRENT
+                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
                         )
                 );
             }
