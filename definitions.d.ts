@@ -20,6 +20,7 @@ export interface Location {
     accuracy: number;
     altitude: number | null;
     altitudeAccuracy: number | null;
+    simulated: boolean;
     bearing: number | null;
     speed: number | null;
     time: number | null;

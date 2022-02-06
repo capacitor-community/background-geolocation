@@ -216,6 +216,10 @@ public class BackgroundGeolocation extends Plugin {
         } else {
             obj.put("altitudeAccuracy", JSONObject.NULL);
         }
+        // In addition to mocking locations in development, Android allows the
+        // installation of apps which have the power to simulate location
+        // readings in other apps.
+        obj.put("simulated", location.isFromMockProvider());
         obj.put("speed", location.hasSpeed() ? location.getSpeed() : JSONObject.NULL);
         obj.put("bearing", location.hasBearing() ? location.getBearing() : JSONObject.NULL);
         obj.put("time", location.getTime());
