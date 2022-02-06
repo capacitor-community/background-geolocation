@@ -7,12 +7,22 @@ import CoreLocation
 let null = Optional<Double>.none as Any
 
 func formatLocation(_ location: CLLocation) -> PluginCallResultData {
+    var simulated = false;
+    if #available(iOS 15, *) {
+        // Prior to iOS 15, it was not possible to detect simulated locations.
+        // But in general, it is very difficult to simulate locations on iOS in
+        // production.
+        if location.sourceInformation != nil {
+            simulated = location.sourceInformation!.isSimulatedBySoftware;
+        }
+    }
     return [
         "latitude": location.coordinate.latitude,
         "longitude": location.coordinate.longitude,
         "accuracy": location.horizontalAccuracy,
         "altitude": location.altitude,
         "altitudeAccuracy": location.verticalAccuracy,
+        "simulated": simulated,
         "speed": location.speed < 0 ? null : location.speed,
         "bearing": location.course < 0 ? null : location.course,
         "time": NSNumber(
@@ -65,7 +75,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
 
     @objc func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
-        
+
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
             let background = call.getString("backgroundMessage") != nil

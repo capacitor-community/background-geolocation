@@ -85,6 +85,8 @@ BackgroundGeolocation.addWatcher(
     altitudeAccuracy: 4,
     // Deviation from true north in degrees (or null).
     bearing: 159.60000610351562,
+    // True if the location was simulated by software, rather than GPS.
+    simulated: false,
     // Speed in metres per second (or null).
     speed: 23.51068878173828,
     // Time the location was produced, in milliseconds since the unix epoch.
