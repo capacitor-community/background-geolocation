@@ -41,7 +41,11 @@ BackgroundGeolocation.addWatcher(
 
         // The minimum number of metres between subsequent locations. Defaults
         // to 0.
-        distanceFilter: 50
+        distanceFilter: 50,
+         // The if you set the distanceFilter to 0 , you can use the interval to receive the location 
+         // periodically even if the device doesn't move
+         // Default is 1000ms , with distanceFilter of 0 Set + 10 Seconds for battery life
+        Interval: 1000
     },
     function callback(location, error) {
         if (error) {
