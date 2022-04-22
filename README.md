@@ -223,5 +223,8 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v0.3.15
+- On iOS, the status bar now turns blue whilst the location is being watched in the background. This provides the user a straightforward way to return to the app.
+
 ### v0.3.12
 - Added the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
