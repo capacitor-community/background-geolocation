@@ -98,6 +98,7 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                 "distanceFilter"
             ) ?? kCLDistanceFilterNone;
             manager.allowsBackgroundLocationUpdates = background
+            manager.showsBackgroundLocationIndicator = background
             self.watchers.append(watcher)
             if call.getBool("requestPermissions") != false {
                 let status = CLLocationManager.authorizationStatus()
