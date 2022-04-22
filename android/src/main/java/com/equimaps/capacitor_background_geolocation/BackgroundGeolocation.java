@@ -309,23 +309,23 @@ public class BackgroundGeolocation extends Plugin {
     }
 
     @Override
-    protected void handleOnStart() {
+    protected void handleOnResume() {
         if (service != null) {
             service.onActivityStarted();
             if (stoppedWithoutPermissions && hasRequiredPermissions()) {
                 service.onPermissionsGranted();
             }
         }
-        super.handleOnStart();
+        super.handleOnResume();
     }
 
     @Override
-    protected void handleOnStop() {
+    protected void handleOnPause() {
         if (service != null) {
             service.onActivityStopped();
         }
         stoppedWithoutPermissions = !hasRequiredPermissions();
-        super.handleOnStop();
+        super.handleOnPause();
     }
 
     @Override

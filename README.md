@@ -223,6 +223,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v0.3.16
+- Fixed background location updates for some devices running Android 12.
+
 ### v0.3.15
 - On iOS, the status bar now turns blue whilst the location is being watched in the background. This provides the user a straightforward way to return to the app.
 
