@@ -206,6 +206,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.2
+- Prevented location updates from halting on iOS due to extended inactivity.
+
 ### v1.2.1
 - Fixed background location updates for some devices running Android 12.
 
