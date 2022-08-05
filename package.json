@@ -23,12 +23,12 @@
     "definitions.d.ts"
   ],
   "devDependencies": {
-    "@capacitor/android": "^3.1.1",
-    "@capacitor/core": "^3.1.1",
-    "@capacitor/ios": "^3.1.1"
+    "@capacitor/android": "^4.0.0",
+    "@capacitor/core": "^4.0.0",
+    "@capacitor/ios": "^4.0.0"
   },
   "peerDependencies": {
-    "@capacitor/core": "^3.1.1"
+    "@capacitor/core": ">=3.0.0"
   },
   "capacitor": {
     "ios": {

@@ -130,6 +130,7 @@ Different versions of the plugin support different versions of Capacitor:
 |------------|--------|
 | v2         | v0.3   |
 | v3         | v1     |
+| v4         | v1     |
 
 Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
@@ -206,17 +207,20 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.3
+- Adds support for Capacitor v4.
+
 ### v1.2.2
-- Prevented location updates from halting on iOS due to extended inactivity.
+- Prevents location updates from halting on iOS due to extended inactivity.
 
 ### v1.2.1
-- Fixed background location updates for some devices running Android 12.
+- Fixes background location updates for some devices running Android 12.
 
 ### v1.2.0
 - On iOS, the status bar now turns blue whilst the location is being watched in the background. This provides the user a straightforward way to return to the app.
 
 ### v1.0.4
-- Added the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
+- Adds the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
 
 ### v1.0.0
 - BREAKING: `addWatcher` now returns a Promise which resolves to the callback ID, rather than the callback ID itself.
