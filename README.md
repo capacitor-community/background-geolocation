@@ -159,24 +159,6 @@ Add the following keys to `Info.plist.`:
 
 ### Android
 
-Configure `AndroidManifest.xml`:
-```xml
-<manifest>
-    <application>
-        <service
-            android:name="com.equimaps.capacitor_background_geolocation.BackgroundGeolocationService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="location" />
-    </application>
-
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-feature android:name="android.hardware.location.gps" />
-</manifest>
-```
-
 Configration specific to Android can be made in `strings.xml`:
 ```xml
 <resources>
