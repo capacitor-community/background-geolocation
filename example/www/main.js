@@ -53,7 +53,7 @@ function add_watcher(background) {
                 backgroundMessage: "Cancel to prevent battery drain."
             }
             : {
-                distanceFilter: 10
+                // distanceFilter: 10
             }
         )),
         function callback(location, error) {

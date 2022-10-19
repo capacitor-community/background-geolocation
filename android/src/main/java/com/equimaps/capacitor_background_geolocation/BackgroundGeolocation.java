@@ -47,6 +47,24 @@ public class BackgroundGeolocation extends Plugin {
     private PluginCall callPendingPermissions = null;
     private Boolean stoppedWithoutPermissions = false;
 
+    private void fetchLastLocation(PluginCall call) {
+        try {
+            LocationServices.getFusedLocationProviderClient(
+                    getContext()
+            ).getLastLocation().addOnSuccessListener(
+                    getActivity(),
+                    new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                call.resolve(formatLocation(location));
+                            }
+                        }
+                    }
+            );
+        } catch (SecurityException ignore) {}
+    }
+
     @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
         if (service == null) {
@@ -61,25 +79,11 @@ public class BackgroundGeolocation extends Plugin {
             } else {
                 call.reject("Permission denied.", "NOT_AUTHORIZED");
             }
-        } else {
-            if (!isLocationEnabled(getContext())) {
-                call.reject("Location services disabled.", "NOT_AUTHORIZED");
-            }
+        } else if (!isLocationEnabled(getContext())) {
+            call.reject("Location services disabled.", "NOT_AUTHORIZED");
         }
         if (call.getBoolean("stale", false)) {
-            LocationServices.getFusedLocationProviderClient(
-                    getContext()
-            ).getLastLocation().addOnSuccessListener(
-                    getActivity(),
-                    new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                call.resolve(formatLocation(location));
-                            }
-                        }
-                    }
-            );
+            fetchLastLocation(call);
         }
         Notification backgroundNotification = null;
         String backgroundMessage = call.getString("backgroundMessage");
@@ -144,20 +148,25 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (callPendingPermissions == null) {
             return;
         }
-
-        for(int result : grantResults) {
+        PluginCall call = callPendingPermissions;
+        callPendingPermissions = null;
+        for (int result : grantResults) {
             if (result == PackageManager.PERMISSION_DENIED) {
-                callPendingPermissions.reject("User denied location permission", "NOT_AUTHORIZED");
-                break;
+                call.reject("User denied location permission", "NOT_AUTHORIZED");
+                return;
             }
         }
-        callPendingPermissions = null;
+        if (call.getBoolean("stale", false)) {
+            fetchLastLocation(call);
+        }
         if (service != null) {
             service.onPermissionsGranted();
+            // The handleOnResume method will now be called, and we don't need it to call
+            // service.onPermissionsGranted again so we reset this flag.
+            stoppedWithoutPermissions = false;
         }
     }
 

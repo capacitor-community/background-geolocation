@@ -1,17 +1,5 @@
-# Example app
-For development of this plugin.
+A Capacitor app demonstrating the background geolocation plugin.
 
-## Instructions
-
-```
-npm run watch &
-
-cd example && \
-  npm i && \
-  npx cap update && \
-  npx cap copy &&
-  npm run watch &
-
-npx cap open android
-npx cap open ios
-```
+    npm i && npx cap sync
+    npx cap open android
+    npx cap open ios

@@ -103,11 +103,16 @@ public class BackgroundGeolocationService extends Service {
             watcher.backgroundNotification = backgroundNotification;
             watchers.add(watcher);
 
-            watcher.client.requestLocationUpdates(
-                    watcher.locationRequest,
-                    watcher.locationCallback,
-                    null
-            );
+            // According to Android Studio, this method can throw a Security Exception if
+            // permissions are not yet granted. Rather than check the permissions, which is fiddly,
+            // we simply ignore the exception.
+            try {
+                watcher.client.requestLocationUpdates(
+                        watcher.locationRequest,
+                        watcher.locationCallback,
+                        null
+                );
+            } catch (SecurityException ignore) {}
         }
 
         void removeWatcher(String id) {
