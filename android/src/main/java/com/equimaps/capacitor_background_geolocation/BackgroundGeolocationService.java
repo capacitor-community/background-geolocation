@@ -42,6 +42,20 @@ public class BackgroundGeolocationService extends Service {
         return binder;
     }
 
+    // Some devices allow a foreground service to outlive the application's main
+    // activity, leading to nasty crashes as reported in issue #59. If we learn
+    // that the application has been killed, all watchers are stopped and the
+    // service is terminated immediately.
+    @Override
+    public boolean onUnbind(Intent intent) {
+        for (Watcher watcher : watchers) {
+            watcher.client.removeLocationUpdates(watcher.locationCallback);
+            watchers.remove(watcher);
+        }
+        stopSelf();
+        return false;
+    }
+
     private class Watcher {
         public String id;
         public FusedLocationProviderClient client;
