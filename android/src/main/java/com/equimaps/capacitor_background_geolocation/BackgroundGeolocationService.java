@@ -5,8 +5,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
 import com.getcapacitor.android.BuildConfig;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -16,9 +18,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashSet;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import org.json.JSONObject;
 
 // A bound and started service that is promoted to a foreground service when
 // location updates have been requested and the main activity is stopped.
@@ -79,7 +88,8 @@ public class BackgroundGeolocationService extends Service {
         void addWatcher(
                 final String id,
                 Notification backgroundNotification,
-                float distanceFilter
+                float distanceFilter,
+                String filePath
         ) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
                     BackgroundGeolocationService.this
@@ -94,6 +104,7 @@ public class BackgroundGeolocationService extends Service {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
+                    logLocationToFile(filePath, location);
                     Intent intent = new Intent(ACTION_BROADCAST);
                     intent.putExtra("location", location);
                     intent.putExtra("id", id);
@@ -169,5 +180,48 @@ public class BackgroundGeolocationService extends Service {
         void stopService() {
             BackgroundGeolocationService.this.stopSelf();
         }
+    }
+
+    void logLocationToFile(String filePath, Location location) {
+        if (filePath == null || filePath.length() == 0) {
+            return;
+        }
+        try {
+            File file = new File(filePath.replace("file://", ""));
+            if (!file.exists()) file.createNewFile();
+            FileOutputStream fileStream = new FileOutputStream(file, true);
+            OutputStreamWriter osw = new OutputStreamWriter(fileStream);
+            osw.write(formatLocation(location) + "\n");
+            osw.flush();
+            osw.close();
+            fileStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static JSObject formatLocation(Location location) {
+        JSObject obj = new JSObject();
+        obj.put("latitude", location.getLatitude());
+        obj.put("longitude", location.getLongitude());
+        // The docs state that all Location objects have an accuracy, but then why is there a
+        // hasAccuracy method? Better safe than sorry.
+        obj.put("accuracy", location.hasAccuracy() ? location.getAccuracy() : JSONObject.NULL);
+        obj.put("altitude", location.hasAltitude() ? location.getAltitude() : JSONObject.NULL);
+        if (Build.VERSION.SDK_INT >= 26 && location.hasVerticalAccuracy()) {
+            obj.put("altitudeAccuracy", location.getVerticalAccuracyMeters());
+        } else {
+            obj.put("altitudeAccuracy", JSONObject.NULL);
+        }
+        // In addition to mocking locations in development, Android allows the
+        // installation of apps which have the power to simulate location
+        // readings in other apps.
+        obj.put("simulated", location.isFromMockProvider());
+        obj.put("speed", location.hasSpeed() ? location.getSpeed() : JSONObject.NULL);
+        obj.put("bearing", location.hasBearing() ? location.getBearing() : JSONObject.NULL);
+        obj.put("time", location.getTime());
+        return obj;
     }
 }

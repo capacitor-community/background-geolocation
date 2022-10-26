@@ -41,7 +41,10 @@ BackgroundGeolocation.addWatcher(
 
         // The minimum number of metres between subsequent locations. Defaults
         // to 0.
-        distanceFilter: 50
+        distanceFilter: 50,
+
+        // A file URL to use to log the locations received, can be good for app crashes and debug
+        file: "file://path/to/file.txt"
     },
     function callback(location, error) {
         if (error) {
