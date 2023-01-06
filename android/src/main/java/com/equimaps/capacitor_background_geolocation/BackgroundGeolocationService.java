@@ -162,7 +162,18 @@ public class BackgroundGeolocationService extends Service {
         void onActivityStopped() {
             Notification notification = getNotification();
             if (notification != null) {
-                startForeground(NOTIFICATION_ID, notification);
+                try {
+                    // Android 12 has a bug
+                    // (https://issuetracker.google.com/issues/229000935)
+                    // whereby it mistakenly thinks the app is in the
+                    // foreground at this point, even though it is not. This
+                    // causes a ForegroundServiceStartNotAllowedException to be
+                    // raised, crashing the app unless we suppress it here.
+                    // See issue #86.
+                    startForeground(NOTIFICATION_ID, notification);
+                } catch (Exception exception) {
+                    Logger.error("Failed to start service", exception);
+                }
             }
         }
 
