@@ -16,10 +16,16 @@ const colours = [
     "cyan"
 ];
 
+function timestamp(time) {
+    return String(Math.floor((time - started) / 1000));
+}
+
 function log_for_watcher(text, time, colour = "gray") {
     const li = document.createElement("li");
     li.style.color = colour;
-    li.innerText = String(Math.floor((time - started) / 1000)) + ":" + text;
+    li.innerText = (
+        "L" + timestamp(time) + ":W" + timestamp(Date.now()) + ":" + text
+    );
     const container = document.getElementById("log");
     return container.insertBefore(li, container.firstChild);
 }
