@@ -94,9 +94,13 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
                 ? kCLLocationAccuracyBestForNavigation
                 : kCLLocationAccuracyBest
             )
-            manager.distanceFilter = call.getDouble(
-                "distanceFilter"
-            ) ?? kCLDistanceFilterNone;
+            var distanceFilter = call.getDouble("distanceFilter")
+            // It appears that setting manager.distanceFilter to 0 can prevent
+            // subsequent location updates. See issue #88.
+            if distanceFilter == nil || distanceFilter == 0 {
+                distanceFilter = kCLDistanceFilterNone
+            }
+            manager.distanceFilter = distanceFilter!
             manager.allowsBackgroundLocationUpdates = background
             manager.showsBackgroundLocationIndicator = background
             manager.pausesLocationUpdatesAutomatically = false
