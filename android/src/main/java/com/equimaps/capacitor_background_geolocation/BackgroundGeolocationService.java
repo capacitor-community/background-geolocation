@@ -37,6 +37,15 @@ public class BackgroundGeolocationService extends Service {
     // Must be unique for this application.
     private static final int NOTIFICATION_ID = 28351;
 
+    private class Watcher {
+        public String id;
+        public FusedLocationProviderClient client;
+        public LocationRequest locationRequest;
+        public LocationCallback locationCallback;
+        public Notification backgroundNotification;
+    }
+    private HashSet<Watcher> watchers = new HashSet<Watcher>();
+
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
@@ -50,20 +59,11 @@ public class BackgroundGeolocationService extends Service {
     public boolean onUnbind(Intent intent) {
         for (Watcher watcher : watchers) {
             watcher.client.removeLocationUpdates(watcher.locationCallback);
-            watchers.remove(watcher);
         }
+        watchers = new HashSet<Watcher>();
         stopSelf();
         return false;
     }
-
-    private class Watcher {
-        public String id;
-        public FusedLocationProviderClient client;
-        public LocationRequest locationRequest;
-        public LocationCallback locationCallback;
-        public Notification backgroundNotification;
-    }
-    private HashSet<Watcher> watchers = new HashSet<Watcher>();
 
     Notification getNotification() {
         for (Watcher watcher : watchers) {
