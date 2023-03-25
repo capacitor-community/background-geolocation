@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.view.View;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
@@ -333,26 +332,6 @@ public class BackgroundGeolocation extends Plugin {
     protected void handleOnPause() {
         if (service != null) {
             service.onActivityStopped();
-
-// There have been reports (#89 and #94) that locations cease to be delivered
-// after 5 minutes in the background, at least with Capacitor 4. The locations
-// arrive on the native side, but are not delivered to the WebView until it
-// returns the foreground, at which point the locations are all delivered at
-// once.
-
-// This hack comes from github.com/angeloraso/capacitor-plugin-background-mode,
-// and works by tricking the WebView into thinking it's visible even when it's
-// not. This prevents it going to sleep, keeping its event loop responsive
-// indefinitely.
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000);
-                    this.bridge.getWebView().dispatchWindowVisibilityChanged(
-                        View.VISIBLE
-                    );
-                } catch (Exception ignore) {}
-            }).start();
         }
         stoppedWithoutPermissions = !hasRequiredPermissions();
         super.handleOnPause();
