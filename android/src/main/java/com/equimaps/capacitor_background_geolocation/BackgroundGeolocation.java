@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 
-import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -57,7 +56,7 @@ public class BackgroundGeolocation extends Plugin {
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
-                                call.resolve(formatLocation(location));
+                                call.resolve(BackgroundGeolocationService.formatLocation(location));
                             }
                         }
                     }
@@ -141,7 +140,8 @@ public class BackgroundGeolocation extends Plugin {
         service.addWatcher(
                 call.getCallbackId(),
                 backgroundNotification,
-                call.getFloat("distanceFilter", 0f)
+                call.getFloat("distanceFilter", 0f),
+                call.getString("file", null)
         );
     }
 
@@ -212,28 +212,7 @@ public class BackgroundGeolocation extends Plugin {
         }
     }
 
-    private static JSObject formatLocation(Location location) {
-        JSObject obj = new JSObject();
-        obj.put("latitude", location.getLatitude());
-        obj.put("longitude", location.getLongitude());
-        // The docs state that all Location objects have an accuracy, but then why is there a
-        // hasAccuracy method? Better safe than sorry.
-        obj.put("accuracy", location.hasAccuracy() ? location.getAccuracy() : JSONObject.NULL);
-        obj.put("altitude", location.hasAltitude() ? location.getAltitude() : JSONObject.NULL);
-        if (Build.VERSION.SDK_INT >= 26 && location.hasVerticalAccuracy()) {
-            obj.put("altitudeAccuracy", location.getVerticalAccuracyMeters());
-        } else {
-            obj.put("altitudeAccuracy", JSONObject.NULL);
-        }
-        // In addition to mocking locations in development, Android allows the
-        // installation of apps which have the power to simulate location
-        // readings in other apps.
-        obj.put("simulated", location.isFromMockProvider());
-        obj.put("speed", location.hasSpeed() ? location.getSpeed() : JSONObject.NULL);
-        obj.put("bearing", location.hasBearing() ? location.getBearing() : JSONObject.NULL);
-        obj.put("time", location.getTime());
-        return obj;
-    }
+    
 
     // Sends messages to the service.
     private BackgroundGeolocationService.LocalBinder service = null;
@@ -254,7 +233,7 @@ public class BackgroundGeolocation extends Plugin {
                 }
                 return;
             }
-            call.success(formatLocation(location));
+            call.success(BackgroundGeolocationService.formatLocation(location));
         }
     }
 
