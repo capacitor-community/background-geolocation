@@ -1,7 +1,7 @@
 {
   "appId": "com.equimaps.capacitor_background_geolocation_example",
   "appName": "example",
-  "bundledWebRuntime": false,
+  "android": {"useLegacyBridge": true},
   "npmClient": "npm",
   "webDir": "www"
 }

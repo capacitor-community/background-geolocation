@@ -159,6 +159,8 @@ Add the following keys to `Info.plist.`:
 
 ### Android
 
+Set the the `android.useLegacyBridge` option to `true` in your Capacitor configuration. This prevent location updates from halting after 5 minutes in the background. See https://capacitorjs.com/docs/config and #89.
+
 Configration specific to Android can be made in `strings.xml`:
 ```xml
 <resources>
