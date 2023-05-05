@@ -1,15 +1,16 @@
 {
-  "private": true,
-  "name": "capacitor-app",
-  "version": "1.0.0",
-  "scripts": {
-    "prepare": "cp -R node_modules/@capacitor/core/dist/capacitor.js* www/"
-  },
-  "dependencies": {
-    "@capacitor-community/background-geolocation": "../",
-    "@capacitor/android": "^4.0.0",
-    "@capacitor/cli": "^4.0.0",
-    "@capacitor/core": "^4.0.0",
-    "@capacitor/ios": "^4.0.0"
-  }
+    "private": true,
+    "name": "capacitor-app",
+    "version": "1.0.0",
+    "scripts": {
+        "prepare": "cp node_modules/@capacitor/core/dist/capacitor.js* node_modules/@capacitor/local-notifications/dist/plugin.js* www/"
+    },
+    "dependencies": {
+        "@capacitor-community/background-geolocation": "../",
+        "@capacitor/android": "^5.0.0",
+        "@capacitor/cli": "^5.0.0",
+        "@capacitor/core": "^5.0.0",
+        "@capacitor/ios": "^5.0.0",
+        "@capacitor/local-notifications": "^5.0.0"
+    }
 }

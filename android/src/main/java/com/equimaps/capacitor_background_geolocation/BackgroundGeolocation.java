@@ -25,7 +25,6 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
-import com.getcapacitor.android.BuildConfig;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -248,13 +247,11 @@ public class BackgroundGeolocation extends Plugin {
                 return;
             }
             Location location = intent.getParcelableExtra("location");
-            if (location == null) {
-                if (BuildConfig.DEBUG) {
-                    call.error("No locations received");
-                }
-                return;
+            if (location != null) {
+                call.success(formatLocation(location));
+            } else {
+                Logger.debug("No locations received");
             }
-            call.success(formatLocation(location));
         }
     }
 

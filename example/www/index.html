@@ -19,7 +19,8 @@
 
   <button onclick="add_watcher(false)">+FG</button>
   <button onclick="add_watcher(true)">+BG</button>
-  Guess:
+  <br>Notification permissions: <button onclick="request_permissions()">Request</button>
+  <br>Guess:
   <button onclick="guess(50)">50ms</button>
   <button onclick="guess(100)">100ms</button>
   <button onclick="guess(250)">250ms</button>
@@ -30,6 +31,7 @@
   </ul>
 
   <script src="capacitor.js"></script>
+  <script src="plugin.js"></script> <!-- local-notifications -->
   <script src="main.js"></script>
 </body>
 </html>

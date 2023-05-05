@@ -131,6 +131,7 @@ Different versions of the plugin support different versions of Capacitor:
 | v2         | v0.3   |
 | v3         | v1     |
 | v4         | v1     |
+| v5         | v1     |
 
 Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
@@ -160,6 +161,8 @@ Add the following keys to `Info.plist.`:
 ### Android
 
 Set the the `android.useLegacyBridge` option to `true` in your Capacitor configuration. This prevent location updates from halting after 5 minutes in the background. See https://capacitorjs.com/docs/config and #89.
+
+On Android 13+, the app needs the `POST_NOTIFICATIONS` runtime permission to show the persistent notification informing the user that their location is being used in the background. You may need to request this permission from the user, see https://developer.android.com/develop/ui/views/notifications/notification-permission.
 
 Configration specific to Android can be made in `strings.xml`:
 ```xml

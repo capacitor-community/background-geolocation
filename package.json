@@ -1,41 +1,41 @@
 {
-  "name": "@capacitor-community/background-geolocation",
-  "version": "1.2.13",
-  "description": "Receive geolocation updates even while app is backgrounded.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/capacitor-community/background-geolocation"
-  },
-  "license": "MIT",
-  "author": "James Diacono",
-  "types": "definitions.d.ts",
-  "files": [
-    "android/build.gradle",
-    "android/settings.gradle",
-    "android/proguard-rules.pro",
-    "android/gradle/wrapper/gradle-wrapper.properties",
-    "android/gradle.properties",
-    "ios/Plugin/Plugin.*",
-    "android/src/main/",
-    "ios/Podfile*",
-    "ios/Plugin/Info.plist",
-    "CapacitorCommunityBackgroundGeolocation.podspec",
-    "definitions.d.ts"
-  ],
-  "devDependencies": {
-    "@capacitor/android": "^4.0.0",
-    "@capacitor/core": "^4.0.0",
-    "@capacitor/ios": "^4.0.0"
-  },
-  "peerDependencies": {
-    "@capacitor/core": ">=3.0.0"
-  },
-  "capacitor": {
-    "ios": {
-      "src": "ios"
+    "name": "@capacitor-community/background-geolocation",
+    "version": "1.2.13",
+    "description": "Receive geolocation updates even while the app is in the background.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/capacitor-community/background-geolocation"
     },
-    "android": {
-      "src": "android"
+    "license": "MIT",
+    "author": "James Diacono",
+    "types": "definitions.d.ts",
+    "files": [
+        "android/build.gradle",
+        "android/settings.gradle",
+        "android/proguard-rules.pro",
+        "android/gradle/wrapper/gradle-wrapper.properties",
+        "android/gradle.properties",
+        "ios/Plugin/Plugin.*",
+        "android/src/main/",
+        "ios/Podfile*",
+        "ios/Plugin/Info.plist",
+        "CapacitorCommunityBackgroundGeolocation.podspec",
+        "definitions.d.ts"
+    ],
+    "devDependencies": {
+        "@capacitor/android": "^5.0.0",
+        "@capacitor/core": "^5.0.0",
+        "@capacitor/ios": "^5.0.0"
+    },
+    "peerDependencies": {
+        "@capacitor/core": "^5.0.0"
+    },
+    "capacitor": {
+        "ios": {
+            "src": "ios"
+        },
+        "android": {
+            "src": "android"
+        }
     }
-  }
 }

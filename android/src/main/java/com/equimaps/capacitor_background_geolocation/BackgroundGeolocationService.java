@@ -8,7 +8,6 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import com.getcapacitor.Logger;
-import com.getcapacitor.android.BuildConfig;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
@@ -103,7 +102,7 @@ public class BackgroundGeolocationService extends Service {
                 }
                 @Override
                 public void onLocationAvailability(LocationAvailability availability) {
-                    if (!availability.isLocationAvailable() && BuildConfig.DEBUG) {
+                    if (!availability.isLocationAvailable()) {
                         Logger.debug("Location not available");
                     }
                 }

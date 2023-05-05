@@ -1,5 +1,5 @@
-/*jslint browser, devel */
-/*global capacitorExports */
+/*jslint browser, null, devel */
+/*global capacitorExports, capacitorLocalNotifications */
 const {registerPlugin} = capacitorExports;
 const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
@@ -20,7 +20,7 @@ function timestamp(time) {
     return String(Math.floor((time - started) / 1000));
 }
 
-function log_for_watcher(text, time, colour = "gray") {
+function log_for_watcher(text, time = Date.now(), colour = "gray") {
     const li = document.createElement("li");
     li.style.color = colour;
     li.innerText = (
@@ -154,4 +154,12 @@ function guess(timeout) {
             )
         );
     });
+}
+
+function request_permissions() {
+    capacitorLocalNotifications.LocalNotifications.requestPermissions().then(
+        function (status) {
+            log_for_watcher("Notification permissions " + status.display);
+        }
+    );
 }
