@@ -194,6 +194,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.14
+- Adds support for Capacitor v5.
+
 ### v1.2.3
 - Adds support for Capacitor v4.
 
