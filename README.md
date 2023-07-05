@@ -194,6 +194,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.15
+- Updating iOS deployment target to 13.0
+
 ### v1.2.14
 - Adds support for Capacitor v5.
 
