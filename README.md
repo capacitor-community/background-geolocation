@@ -1,5 +1,5 @@
 # Background Geolocation
-A Capacitor plugin which lets you receive geolocation updates even while the app is backgrounded. Only iOS and Android platforms are supported.
+A Capacitor plugin that lets you receive geolocation updates even while the app is backgrounded. Only iOS and Android platforms are supported.
 
 ## Usage
 
@@ -160,7 +160,7 @@ Add the following keys to `Info.plist.`:
 
 ### Android
 
-Set the the `android.useLegacyBridge` option to `true` in your Capacitor configuration. This prevent location updates from halting after 5 minutes in the background. See https://capacitorjs.com/docs/config and #89.
+Set the the `android.useLegacyBridge` option to `true` in your Capacitor configuration. This prevents location updates halting after 5 minutes in the background. See https://capacitorjs.com/docs/config and issue #89.
 
 On Android 13+, the app needs the `POST_NOTIFICATIONS` runtime permission to show the persistent notification informing the user that their location is being used in the background. You may need to request this permission from the user, see https://developer.android.com/develop/ui/views/notifications/notification-permission.
 
@@ -210,10 +210,10 @@ Configration specific to Android can be made in `strings.xml`:
 - On iOS, the status bar now turns blue whilst the location is being watched in the background. This provides the user a straightforward way to return to the app.
 
 ### v1.0.4
-- Adds the `ACCESS_COARSE_LOCATION` permission. This is required for apps which target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
+- Adds the `ACCESS_COARSE_LOCATION` permission. This is required for apps that target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
 
 ### v1.0.0
-- BREAKING: `addWatcher` now returns a Promise which resolves to the callback ID, rather than the callback ID itself.
+- BREAKING: `addWatcher` now returns a Promise that resolves to the callback ID, rather than the callback ID itself.
 - BREAKING: The plugin is imported via Capacitor's `registerPlugin` function, rather than from the `Plugins` object.
 - BREAKING: Drops support for iOS v11 and Capacitor v2.
 - Adds support for Capacitor v3.
