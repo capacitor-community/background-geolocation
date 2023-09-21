@@ -329,6 +329,12 @@ public class BackgroundGeolocation extends Plugin {
     protected void handleOnPause() {
         if (service != null) {
             service.onActivityStopped();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                    this.bridge.getWebView().dispatchWindowVisibilityChanged(View.VISIBLE);
+                } catch (Exception ignore) {}
+            }).start();
         }
         stoppedWithoutPermissions = !hasRequiredPermissions();
         super.handleOnPause();
@@ -339,6 +345,6 @@ public class BackgroundGeolocation extends Plugin {
         if (service != null) {
             service.stopService();
         }
-        super.handleOnDestroy();
+           super.handleOnDestroy();
     }
 }
