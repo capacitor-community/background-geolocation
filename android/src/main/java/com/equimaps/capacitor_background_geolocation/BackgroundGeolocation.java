@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import org.json.JSONObject;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import android.view.View;
 
 @NativePlugin(
         permissions={
