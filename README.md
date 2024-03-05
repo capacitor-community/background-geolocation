@@ -132,6 +132,7 @@ Different versions of the plugin support different versions of Capacitor:
 | v3         | v1     |
 | v4         | v1     |
 | v5         | v1     |
+| v6         | v1     |
 
 Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
@@ -195,6 +196,9 @@ Configration specific to Android can be made in `strings.xml`:
 ```
 
 ## Changelog
+
+### v1.2.17
+- Adds support for Capacitor v6.
 
 ### v1.2.16
 - Fixes background location updates for Android 14.

@@ -1,10 +1,10 @@
 PODS:
-  - Capacitor (5.0.0):
+  - Capacitor (6.0.0-rc.0):
     - CapacitorCordova
   - CapacitorCommunityBackgroundGeolocation (0.0.1):
     - Capacitor
-  - CapacitorCordova (5.0.0)
-  - CapacitorLocalNotifications (5.0.0):
+  - CapacitorCordova (6.0.0-rc.0)
+  - CapacitorLocalNotifications (6.0.0-rc.0):
     - Capacitor
 
 DEPENDENCIES:
@@ -24,11 +24,11 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/local-notifications"
 
 SPEC CHECKSUMS:
-  Capacitor: b332cb737d447561e854039fb72195206685dce2
+  Capacitor: c5b8b4e73032b078db259f1bbe71afd09fd84250
   CapacitorCommunityBackgroundGeolocation: 6f26f4290377dbd1d6dec21e62cb66f008f61ec7
-  CapacitorCordova: 4ea17670ee562680988a7ce9db68dee5160fe564
-  CapacitorLocalNotifications: 8620df7dfc20d028a0c3a1e61acab9bf44462e7c
+  CapacitorCordova: e8930c71b1bf90e793253f3057b3354a88ed83b3
+  CapacitorLocalNotifications: e267b31e5b234f394ce24b0e57b97dc2fdb991f2
 
 PODFILE CHECKSUM: 91fad73239f424f030a191084b1b7ef273b23382
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0

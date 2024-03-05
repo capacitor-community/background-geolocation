@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.equimaps.capacitor_background_geolocation_example"
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.equimaps.capacitor_background_geolocation_example"
         minSdkVersion rootProject.ext.minSdkVersion
