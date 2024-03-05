@@ -196,6 +196,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.16
+- Fixes background location updates for Android 14.
+
 ### v1.2.14
 - Adds support for Capacitor v5.
 
