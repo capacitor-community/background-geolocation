@@ -171,6 +171,14 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         }
     }
 
+    @objc func checkBackgroundLocationPermission(_ call: CAPPluginCall) {
+        let status = CLLocationManager.authorizationStatus()
+        let hasPermission = status == .authorizedAlways
+        var obj = JSObject()
+        obj["hasPermission"] = hasPermission
+        call.resolve(obj)
+    }
+
     public func locationManager(
         _ manager: CLLocationManager,
         didFailWithError error: Error

@@ -22,6 +22,10 @@ export interface CallbackError extends Error {
     code?: string;
 }
 
+export interface CheckPermissionResult {
+    hasPermission: boolean;
+}
+
 export interface BackgroundGeolocationPlugin {
     addWatcher(
         options: WatcherOptions,
@@ -34,4 +38,5 @@ export interface BackgroundGeolocationPlugin {
         id: string
     }): Promise<void>;
     openSettings(): Promise<void>;
+    checkBackgroundLocationPermission(): Promise<CheckPermissionResult>;
 }

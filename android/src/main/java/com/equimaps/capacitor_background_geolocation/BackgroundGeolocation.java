@@ -193,6 +193,14 @@ public class BackgroundGeolocation extends Plugin {
         call.resolve();
     }
 
+    @PluginMethod()
+    public void checkBackgroundLocationPermission(PluginCall call) {
+        Boolean hasPermission = ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        JSObject obj = new JSObject();
+        obj.put("hasPermission", hasPermission);
+        call.resolve(obj);
+    }
+
     // Checks if device-wide location services are disabled
     private static Boolean isLocationEnabled(Context context)
     {

@@ -113,7 +113,41 @@ function guess_location(callback, timeout) {
         }, timeout);
     });
 }
+
 ```
+
+---
+
+### How to Check Background Location Permission (iOS and Android)
+
+```javascript
+async function checkBackgroundPermission() {
+    try {
+        // Check if the background location permission is granted
+        const permissionResult = await BackgroundGeolocation.checkBackgroundLocationPermission();
+
+        if (permissionResult.hasPermission) {
+            console.log('Background location permission is granted.');
+        } else {
+            console.log('Background location permission is not granted.');
+        }
+    } catch (error) {
+        console.error('Error checking background location permission:', error);
+    }
+}
+
+// Call this function to check the background location permission
+checkBackgroundPermission();
+
+```
+#### Expected Response
+
+The permissionResult response will be an object indicating whether the background location permission is granted or not:
+
+- `{ hasPermission: true }` - The background location permission is granted.
+- `{ hasPermission: false }` - The background location permission is not granted.
+
+---
 
 ### Typescript support
 
@@ -196,6 +230,9 @@ Configration specific to Android can be made in `strings.xml`:
 ```
 
 ## Changelog
+
+### v1.2.18
+- Added method to check background location permission (iOS & Android)
 
 ### v1.2.17
 - Adds support for Capacitor v6.
