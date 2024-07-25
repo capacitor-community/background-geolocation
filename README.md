@@ -197,6 +197,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.18
+- Always show the notification when a background watcher exists, improving the reliability of location updates on Android.
+
 ### v1.2.17
 - Adds support for Capacitor v6.
 
