@@ -197,6 +197,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.19
+- Fix a bug preventing the foreground service starting on Android.
+
 ### v1.2.18
 - Always show the notification when a background watcher exists, improving the reliability of location updates on Android.
 

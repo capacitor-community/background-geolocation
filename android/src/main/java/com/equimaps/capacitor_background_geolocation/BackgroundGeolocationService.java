@@ -125,13 +125,12 @@ public class BackgroundGeolocationService extends Service {
             } catch (SecurityException ignore) {}
 
             // Promote the service to the foreground if necessary.
-            if (backgroundNotification != null && (
-                // Unfortunately, 'getForegroundServiceType' was only introduced in API level 29.
-                // However, it appears that 'startForeground' is idempotent, so for older Androids
-                // we just call it repeatedly each time a background watcher is added.
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-                || getForegroundServiceType() == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
-            )) {
+            // Ideally we would only call 'startForeground' if the service is not already
+            // foregrounded. Unfortunately, 'getForegroundServiceType' was only introduced
+            // in API level 29 and seems to behave weirdly, as reported in #120. However,
+            // it appears that 'startForeground' is idempotent, so we just call it repeatedly
+            // each time a background watcher is added.
+            if (backgroundNotification != null) {
                 try {
                     // This method has been known to fail due to weird
                     // permission bugs, so we prevent any exceptions from
