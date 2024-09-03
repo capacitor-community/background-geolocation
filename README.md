@@ -28,7 +28,10 @@ BackgroundGeolocation.addWatcher(
         // The title of the notification mentioned above. Defaults to "Using
         // your location".
         backgroundTitle: "Tracking You.",
-
+        
+        // The color of the notification icon when app is in the background. Defaults to black.
+        backgroundIconColor: "#000000",
+        
         // Whether permissions should be requested from the user automatically,
         // if they are not already granted. Defaults to "true".
         requestPermissions: true,
