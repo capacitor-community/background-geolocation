@@ -246,7 +246,7 @@ public class BackgroundGeolocation extends Plugin {
             }
             Location location = intent.getParcelableExtra("location");
             if (location != null) {
-                call.success(formatLocation(location));
+                call.resolve(formatLocation(location));
             } else {
                 Logger.debug("No locations received");
             }
