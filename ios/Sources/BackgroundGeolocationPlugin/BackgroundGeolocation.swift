@@ -65,13 +65,47 @@ class Watcher {
     }
 }
 
+/**
+ * @file BackgroundGeolocation.swift
+ * This file defines the implementation of the Capacitor plugin `BackgroundGeolocation` for iOS.
+ * The plugin provides an interface between JavaScript and native iOS code, allowing Capacitor applications
+ * to interact with native functionality.
+ *
+ * Documentation Reference: https://capacitorjs.com/docs/plugins/ios
+ */
+
 @objc(BackgroundGeolocation)
-public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
+/**
+ * The BackgroundGeolocation class acts as the main entry point for the Capacitor plugin on the iOS platform.
+ * It extends `CAPPlugin` and conforms to the `CAPBridgedPlugin` protocol.
+ */
+public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDelegate {
     private var watchers = [Watcher]()
 
+    /**
+     * Called when the plugin is loaded. This method can be used for initial setup or configuration.
+     */
     @objc public override func load() {
         UIDevice.current.isBatteryMonitoringEnabled = true
     }
+
+    /// The unique identifier for the plugin.
+    public let identifier = "BackgroundGeolocation"
+
+    /// The name used to reference this plugin in JavaScript.
+    public let jsName = "BackgroundGeolocation"
+
+    /**
+     * A list of methods exposed by this plugin. These methods can be called from the JavaScript side.
+     * - `addWatcher`: A method that accepts a string and returns the same string.
+     * - `removeWatcher`: A method that accepts a string and returns the same string.
+     * - `openSettings`: A method that accepts a string and returns the same string.
+     */
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "addWatcher", returnType: CAPPluginReturnCallback),
+        CAPPluginMethod(name: "removeWatcher", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise)
+    ]
 
     @objc func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
@@ -230,4 +264,3 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         }
     }
 }
-

@@ -1,34 +1,44 @@
 {
     "name": "@capacitor-community/background-geolocation",
-    "version": "1.2.20",
+    "version": "1.2.21",
     "description": "Receive geolocation updates even while the app is in the background.",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/capacitor-community/background-geolocation"
-    },
-    "license": "MIT",
-    "author": "James Diacono",
-    "types": "definitions.d.ts",
     "files": [
         "android/build.gradle",
         "android/settings.gradle",
         "android/proguard-rules.pro",
         "android/gradle/wrapper/gradle-wrapper.properties",
         "android/gradle.properties",
-        "ios/Plugin/Plugin.*",
         "android/src/main/",
-        "ios/Podfile*",
-        "ios/Plugin/Info.plist",
+        "ios/Sources",
+        "ios/Tests",
+        "Package.swift",
         "CapacitorCommunityBackgroundGeolocation.podspec",
         "definitions.d.ts"
     ],
+    "keywords": [
+        "capacitor",
+        "plugin",
+        "native",
+        "geolocation",
+        "background"
+    ],
+    "author": "James Diacono",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/capacitor-community/background-geolocation"
+    },
+    "bugs": {
+      "url": "https://github.com/capacitor-community/background-geolocation/issues"
+    },
+    "types": "definitions.d.ts",
     "devDependencies": {
-        "@capacitor/android": "6.0.0-rc.0",
-        "@capacitor/core": "6.0.0-rc.0",
-        "@capacitor/ios": "6.0.0-rc.0"
+        "@capacitor/android": "^7.0.0",
+        "@capacitor/core": "^7.0.0",
+        "@capacitor/ios": "^7.0.0"
     },
     "peerDependencies": {
-        "@capacitor/core": ">=3.0.0"
+        "@capacitor/core": ">=7.0.0"
     },
     "capacitor": {
         "ios": {
