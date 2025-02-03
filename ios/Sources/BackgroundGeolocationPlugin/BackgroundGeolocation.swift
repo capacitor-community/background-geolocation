@@ -7,7 +7,7 @@ import CoreLocation
 let null = Optional<Double>.none as Any
 
 func formatLocation(_ location: CLLocation) -> PluginCallResultData {
-    var simulated = false;
+    var simulated = false
     if #available(iOS 15, *) {
         // Prior to iOS 15, it was not possible to detect simulated locations.
         // But in general, it is very difficult to simulate locations on iOS in
@@ -25,11 +25,7 @@ func formatLocation(_ location: CLLocation) -> PluginCallResultData {
         "simulated": simulated,
         "speed": location.speed < 0 ? null : location.speed,
         "bearing": location.course < 0 ? null : location.course,
-        "time": NSNumber(
-            value: Int(
-                location.timestamp.timeIntervalSince1970 * 1000
-            )
-        ),
+        "time": NSNumber(value: Int(location.timestamp.timeIntervalSince1970 * 1000))
     ]
 }
 
@@ -43,6 +39,7 @@ class Watcher {
         callbackId = id
         allowStale = stale
     }
+    
     func start() {
         // Avoid unnecessary calls to startUpdatingLocation, which can
         // result in extraneous invocations of didFailWithError.
@@ -51,12 +48,14 @@ class Watcher {
             isUpdatingLocation = true
         }
     }
+    
     func stop() {
         if isUpdatingLocation {
             locationManager.stopUpdatingLocation()
             isUpdatingLocation = false
         }
     }
+    
     func isLocationValid(_ location: CLLocation) -> Bool {
         return (
             allowStale ||
@@ -65,26 +64,11 @@ class Watcher {
     }
 }
 
-/**
- * @file BackgroundGeolocation.swift
- * This file defines the implementation of the Capacitor plugin `BackgroundGeolocation` for iOS.
- * The plugin provides an interface between JavaScript and native iOS code, allowing Capacitor applications
- * to interact with native functionality.
- *
- * Documentation Reference: https://capacitorjs.com/docs/plugins/ios
- */
-
 @objc(BackgroundGeolocation)
-/**
- * The BackgroundGeolocation class acts as the main entry point for the Capacitor plugin on the iOS platform.
- * It extends `CAPPlugin` and conforms to the `CAPBridgedPlugin` protocol.
- */
 public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDelegate {
     private var watchers = [Watcher]()
 
-    /**
-     * Called when the plugin is loaded. This method can be used for initial setup or configuration.
-     */
+    // Called when the plugin is loaded. This method can be used for initial setup or configuration.
     @objc public override func load() {
         UIDevice.current.isBatteryMonitoringEnabled = true
     }
@@ -94,13 +78,14 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
 
     /// The name used to reference this plugin in JavaScript.
     public let jsName = "BackgroundGeolocation"
-
-    /**
-     * A list of methods exposed by this plugin. These methods can be called from the JavaScript side.
-     * - `addWatcher`: A method that accepts a string and returns the same string.
-     * - `removeWatcher`: A method that accepts a string and returns the same string.
-     * - `openSettings`: A method that accepts a string and returns the same string.
-     */
+    
+    // A list of methods exposed by this plugin. These methods can be called from the JavaScript side.
+    // - `addWatcher`: Starts watching for location updates. Accepts an options object and a callback function.
+    //   Returns a Promise that resolves to a watcher ID, which can be used to remove the watcher later.
+    // - `removeWatcher`: Stops a previously added watcher. Accepts an object containing the watcher ID.
+    //   Returns a Promise that resolves when the watcher is removed.
+    // - `openSettings`: Opens the device's location settings to allow the user to grant location permissions.
+    //   Returns a Promise that resolves when the settings screen is opened.
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "addWatcher", returnType: CAPPluginReturnCallback),
         CAPPluginMethod(name: "removeWatcher", returnType: CAPPluginReturnPromise),
@@ -109,7 +94,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
 
     @objc func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
-
+        
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
             let background = call.getString("backgroundMessage") != nil
@@ -134,11 +119,13 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
             if distanceFilter == nil || distanceFilter == 0 {
                 distanceFilter = kCLDistanceFilterNone
             }
+            
             manager.distanceFilter = distanceFilter!
             manager.allowsBackgroundLocationUpdates = background
             manager.showsBackgroundLocationIndicator = background
             manager.pausesLocationUpdatesAutomatically = false
             self.watchers.append(watcher)
+            
             if call.getBool("requestPermissions") != false {
                 let status = CLLocationManager.authorizationStatus()
                 if [
@@ -170,8 +157,8 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
                 if let index = self.watchers.firstIndex(
                     where: { $0.callbackId == callbackId }
                 ) {
-                    self.watchers[index].locationManager.stopUpdatingLocation()
-                    self.watchers.remove(at: index)
+                self.watchers[index].locationManager.stopUpdatingLocation()
+                self.watchers.remove(at: index)
                 }
                 if let savedCall = self.bridge?.savedCall(withID: callbackId) {
                     self.bridge?.releaseCall(savedCall)
@@ -189,7 +176,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
             ) else {
                 return call.reject("No link to settings available")
             }
-
+            
             if UIApplication.shared.canOpenURL(settingsUrl) {
                 UIApplication.shared.open(settingsUrl, completionHandler: {
                     (success) in
@@ -217,7 +204,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
                     if clErr.code == .locationUnknown {
                         // This error is sometimes sent by the manager if
                         // it cannot get a fix immediately.
-                        return
+                return
                     } else if (clErr.code == .denied) {
                         watcher.stop()
                         return call.reject(
