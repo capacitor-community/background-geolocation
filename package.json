@@ -10,7 +10,6 @@
         "android/gradle.properties",
         "android/src/main/",
         "ios/Sources",
-        "ios/Tests",
         "Package.swift",
         "CapacitorCommunityBackgroundGeolocation.podspec",
         "definitions.d.ts"
@@ -27,9 +26,6 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/capacitor-community/background-geolocation"
-    },
-    "bugs": {
-      "url": "https://github.com/capacitor-community/background-geolocation/issues"
     },
     "types": "definitions.d.ts",
     "devDependencies": {
