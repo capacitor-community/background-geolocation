@@ -19,10 +19,6 @@ let package = Package(
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm")
             ],
-            path: "ios/Sources/BackgroundGeolocationPlugin"),
-        .testTarget(
-            name: "BackgroundGeolocationPluginTests",
-            dependencies: ["BackgroundGeolocationPlugin"],
-            path: "ios/Tests/BackgroundGeolocationPluginTests")
+            path: "ios/Sources/BackgroundGeolocationPlugin")
     ]
 )
