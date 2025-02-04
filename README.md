@@ -197,6 +197,12 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.21
+- Migrate iOS from cocoapods to SPM (Swift Package Manager).
+
+### v1.2.20
+- Fix for Capacitor@v7.
+
 ### v1.2.19
 - Fix a bug preventing the foreground service starting on Android.
 

@@ -7,7 +7,7 @@ import CoreLocation
 let null = Optional<Double>.none as Any
 
 func formatLocation(_ location: CLLocation) -> PluginCallResultData {
-    var simulated = false;
+    var simulated = false
     if #available(iOS 15, *) {
         // Prior to iOS 15, it was not possible to detect simulated locations.
         // But in general, it is very difficult to simulate locations on iOS in
@@ -43,6 +43,7 @@ class Watcher {
         callbackId = id
         allowStale = stale
     }
+    
     func start() {
         // Avoid unnecessary calls to startUpdatingLocation, which can
         // result in extraneous invocations of didFailWithError.
@@ -51,12 +52,14 @@ class Watcher {
             isUpdatingLocation = true
         }
     }
+    
     func stop() {
         if isUpdatingLocation {
             locationManager.stopUpdatingLocation()
             isUpdatingLocation = false
         }
     }
+    
     func isLocationValid(_ location: CLLocation) -> Bool {
         return (
             allowStale ||
@@ -66,12 +69,32 @@ class Watcher {
 }
 
 @objc(BackgroundGeolocation)
-public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
+public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDelegate {
     private var watchers = [Watcher]()
 
+    // Called when the plugin is loaded. This method can be used for initial setup or configuration.
     @objc public override func load() {
         UIDevice.current.isBatteryMonitoringEnabled = true
     }
+
+    /// The unique identifier for the plugin.
+    public let identifier = "BackgroundGeolocation"
+
+    /// The name used to reference this plugin in JavaScript.
+    public let jsName = "BackgroundGeolocation"
+    
+    // A list of methods exposed by this plugin. These methods can be called from the JavaScript side.
+    // - `addWatcher`: Starts watching for location updates. Accepts an options object and a callback function.
+    //   Returns a Promise that resolves to a watcher ID, which can be used to remove the watcher later.
+    // - `removeWatcher`: Stops a previously added watcher. Accepts an object containing the watcher ID.
+    //   Returns a Promise that resolves when the watcher is removed.
+    // - `openSettings`: Opens the device's location settings to allow the user to grant location permissions.
+    //   Returns a Promise that resolves when the settings screen is opened.
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "addWatcher", returnType: CAPPluginReturnCallback),
+        CAPPluginMethod(name: "removeWatcher", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise)
+    ]
 
     @objc func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
@@ -100,11 +123,13 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
             if distanceFilter == nil || distanceFilter == 0 {
                 distanceFilter = kCLDistanceFilterNone
             }
+            
             manager.distanceFilter = distanceFilter!
             manager.allowsBackgroundLocationUpdates = background
             manager.showsBackgroundLocationIndicator = background
             manager.pausesLocationUpdatesAutomatically = false
             self.watchers.append(watcher)
+            
             if call.getBool("requestPermissions") != false {
                 let status = CLLocationManager.authorizationStatus()
                 if [
@@ -230,4 +255,3 @@ public class BackgroundGeolocation : CAPPlugin, CLLocationManagerDelegate {
         }
     }
 }
-
