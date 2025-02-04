@@ -25,7 +25,11 @@ func formatLocation(_ location: CLLocation) -> PluginCallResultData {
         "simulated": simulated,
         "speed": location.speed < 0 ? null : location.speed,
         "bearing": location.course < 0 ? null : location.course,
-        "time": NSNumber(value: Int(location.timestamp.timeIntervalSince1970 * 1000))
+        "time": NSNumber(
+            value: Int(
+                location.timestamp.timeIntervalSince1970 * 1000
+            )
+        ),
     ]
 }
 
@@ -94,7 +98,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
 
     @objc func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
-        
+
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
             let background = call.getString("backgroundMessage") != nil
@@ -176,7 +180,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
             ) else {
                 return call.reject("No link to settings available")
             }
-            
+
             if UIApplication.shared.canOpenURL(settingsUrl) {
                 UIApplication.shared.open(settingsUrl, completionHandler: {
                     (success) in
