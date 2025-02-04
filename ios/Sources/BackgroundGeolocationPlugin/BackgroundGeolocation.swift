@@ -157,8 +157,8 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
                 if let index = self.watchers.firstIndex(
                     where: { $0.callbackId == callbackId }
                 ) {
-                self.watchers[index].locationManager.stopUpdatingLocation()
-                self.watchers.remove(at: index)
+                    self.watchers[index].locationManager.stopUpdatingLocation()
+                    self.watchers.remove(at: index)
                 }
                 if let savedCall = self.bridge?.savedCall(withID: callbackId) {
                     self.bridge?.releaseCall(savedCall)
@@ -204,7 +204,7 @@ public class BackgroundGeolocation: CAPPlugin, CAPBridgedPlugin, CLLocationManag
                     if clErr.code == .locationUnknown {
                         // This error is sometimes sent by the manager if
                         // it cannot get a fix immediately.
-                return
+                        return
                     } else if (clErr.code == .denied) {
                         watcher.stop()
                         return call.reject(
