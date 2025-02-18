@@ -136,6 +136,7 @@ Different versions of the plugin support different versions of Capacitor:
 | v4         | v1     |
 | v5         | v1     |
 | v6         | v1     |
+| v7         | v1     |
 
 Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
