@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.graphics.Color;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -87,6 +88,8 @@ public class BackgroundGeolocation extends Plugin {
         }
         Notification backgroundNotification = null;
         String backgroundMessage = call.getString("backgroundMessage");
+        int color = Color.parseColor(call.getString("backgroundIconColor"));
+
         if (backgroundMessage != null) {
             Notification.Builder builder = new Notification.Builder(getContext())
                     .setContentTitle(
@@ -96,6 +99,7 @@ public class BackgroundGeolocation extends Plugin {
                             )
                     )
                     .setContentText(backgroundMessage)
+                    .setColor(color)       
                     .setOngoing(true)
                     .setPriority(Notification.PRIORITY_HIGH)
                     .setWhen(System.currentTimeMillis());
