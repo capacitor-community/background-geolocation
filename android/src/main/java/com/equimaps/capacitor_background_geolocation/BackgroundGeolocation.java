@@ -88,7 +88,6 @@ public class BackgroundGeolocation extends Plugin {
         }
         Notification backgroundNotification = null;
         String backgroundMessage = call.getString("backgroundMessage");
-        int color = Color.parseColor(call.getString("backgroundIconColor"));
 
         if (backgroundMessage != null) {
             Notification.Builder builder = new Notification.Builder(getContext())
@@ -99,7 +98,6 @@ public class BackgroundGeolocation extends Plugin {
                             )
                     )
                     .setContentText(backgroundMessage)
-                    .setColor(color)       
                     .setOngoing(true)
                     .setPriority(Notification.PRIORITY_HIGH)
                     .setWhen(System.currentTimeMillis());
@@ -118,6 +116,18 @@ public class BackgroundGeolocation extends Plugin {
                 );
             } catch (Exception e) {
                 Logger.error("Could not set notification icon", e);
+            }
+
+            try {
+                String color = getAppString(
+                        "capacitor_background_geolocation_notification_color",
+                        null
+                );
+                if (color != null) {
+                    builder.setColor(Color.parseColor(color));
+                }
+            } catch (Exception e) {
+                Logger.error("Could not set notification color", e);
             }
 
             Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(

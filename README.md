@@ -29,9 +29,6 @@ BackgroundGeolocation.addWatcher(
         // your location".
         backgroundTitle: "Tracking You.",
         
-        // The color of the notification icon when app is in the background. Defaults to black.
-        backgroundIconColor: "#000000",
-        
         // Whether permissions should be requested from the user automatically,
         // if they are not already granted. Defaults to "true".
         requestPermissions: true,
@@ -194,6 +191,14 @@ Configration specific to Android can be made in `strings.xml`:
     -->
     <string name="capacitor_background_geolocation_notification_icon">
         drawable/ic_tracking
+    </string>
+
+    <!--
+        The color of the notification as a string parseable by
+        android.graphics.Color.parseColor. Optional.
+    -->
+    <string name="capacitor_background_geolocation_notification_color">
+        yellow
     </string>
 </resources>
 
