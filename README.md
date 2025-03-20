@@ -206,6 +206,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.22
+- Avoid interfering with safe area insets on Android
+
 ### v1.2.21
 - Customize the notification color on Android.
 
