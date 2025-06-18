@@ -188,6 +188,14 @@ Configration specific to Android can be made in `strings.xml`:
         image), it must have a transparent background. To make sure your image
         is compatible, select "Notification Icons" as the Icon Type when
         creating the image asset in Android Studio.
+
+        An incompatible image asset will cause the notification to misbehave in
+        a few telling ways, even if the icon appears correctly:
+
+          - The notification may be dismissable by the user when it should not
+            be.
+          - Tapping the notification may open the settings, not the app.
+          - The notification text may be incorrect.
     -->
     <string name="capacitor_background_geolocation_notification_icon">
         drawable/ic_tracking
