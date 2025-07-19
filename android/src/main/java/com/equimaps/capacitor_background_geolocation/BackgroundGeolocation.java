@@ -286,6 +286,7 @@ public class BackgroundGeolocation extends Plugin {
     public void load() {
         super.load();
 
+        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
         // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getContext().getSystemService(
@@ -303,10 +304,13 @@ public class BackgroundGeolocation extends Plugin {
             channel.enableVibration(false);
             channel.setSound(null, null);
             manager.createNotificationChannel(channel);
+            this.getContext().startForegroundService(serviceIntent);
+        } else {
+            this.getContext().startService(serviceIntent);
         }
 
         this.getContext().bindService(
-                new Intent(this.getContext(), BackgroundGeolocationService.class),
+                serviceIntent,
                 new ServiceConnection() {
                     @Override
                     public void onServiceConnected(ComponentName name, IBinder binder) {
