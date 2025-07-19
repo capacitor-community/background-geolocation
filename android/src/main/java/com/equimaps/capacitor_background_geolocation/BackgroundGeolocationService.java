@@ -43,6 +43,11 @@ public class BackgroundGeolocationService extends Service {
     private HashSet<Watcher> watchers = new HashSet<Watcher>();
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+    
+    @Override
     public IBinder onBind(Intent intent) {
         return binder;
     }
