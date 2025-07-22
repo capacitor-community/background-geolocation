@@ -214,6 +214,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.23
+- Perhaps make location updates more persistent on Android, see #137.
+
 ### v1.2.22
 - Avoid interfering with safe area insets on Android
 
