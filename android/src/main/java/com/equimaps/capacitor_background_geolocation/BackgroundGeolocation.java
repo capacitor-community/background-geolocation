@@ -22,6 +22,7 @@ import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -76,8 +77,8 @@ public class BackgroundGeolocation extends Plugin {
             return;
         }
         call.setKeepAlive(true);
-        
-        if (!getPermissionState("location").equals("granted")) {
+
+        if (getPermissionState("location") != PermissionState.GRANTED) {
             if (call.getBoolean("requestPermissions", true)) {
                 requestPermissionForAlias("location", call, "locationPermissionsCallback");
             } else {
@@ -96,8 +97,8 @@ public class BackgroundGeolocation extends Plugin {
             Notification.Builder builder = new Notification.Builder(getContext())
                     .setContentTitle(
                             call.getString(
-                                "backgroundTitle",
-                                "Using your location"
+                                    "backgroundTitle",
+                                    "Using your location"
                             )
                     )
                     .setContentText(backgroundMessage)
@@ -164,8 +165,8 @@ public class BackgroundGeolocation extends Plugin {
 
     @PermissionCallback
     private void locationPermissionsCallback(PluginCall call) {
-        
-        if (!getPermissionState("location").equals("granted")) {
+
+        if (getPermissionState("location") != PermissionState.GRANTED) {
             call.reject("User denied location permission", "NOT_AUTHORIZED");
             return;
         }
@@ -327,7 +328,7 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnResume() {
         if (service != null) {
-            if (stoppedWithoutPermissions && getPermissionState("location").equals("granted")) {
+            if (stoppedWithoutPermissions && getPermissionState("location") == PermissionState.GRANTED) {
                 service.onPermissionsGranted();
             }
         }
@@ -336,7 +337,7 @@ public class BackgroundGeolocation extends Plugin {
 
     @Override
     protected void handleOnPause() {
-        stoppedWithoutPermissions = !getPermissionState("location").equals("granted");
+        stoppedWithoutPermissions = getPermissionState("location") != PermissionState.GRANTED;
         super.handleOnPause();
     }
 
