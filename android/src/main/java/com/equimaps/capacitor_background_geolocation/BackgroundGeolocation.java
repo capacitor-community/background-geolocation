@@ -22,10 +22,12 @@ import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
-import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -33,18 +35,19 @@ import org.json.JSONObject;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-@NativePlugin(
-        permissions={
-                // As of API level 31, the coarse permission MUST accompany
-                // the fine permission.
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-        },
-        // A random integer which is hopefully unique to this plugin.
-        permissionRequestCode = 28351
+@CapacitorPlugin(
+        name = "BackgroundGeolocation",
+        permissions = {
+                @Permission(
+                        strings = {
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                        },
+                        alias = "location"
+                )
+        }
 )
 public class BackgroundGeolocation extends Plugin {
-    private PluginCall callPendingPermissions = null;
     private BackgroundGeolocationService.LocalBinder service = null;
     private Boolean stoppedWithoutPermissions = false;
 
@@ -66,17 +69,17 @@ public class BackgroundGeolocation extends Plugin {
         } catch (SecurityException ignore) {}
     }
 
-    @PluginMethod(returnType=PluginMethod.RETURN_CALLBACK)
+    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
         if (service == null) {
             call.reject("Service not running.");
             return;
         }
         call.setKeepAlive(true);
-        if (!hasRequiredPermissions()) {
+        
+        if (!getPermissionState("location").equals("granted")) {
             if (call.getBoolean("requestPermissions", true)) {
-                callPendingPermissions = call;
-                pluginRequestAllPermissions();
+                requestPermissionForAlias("location", call, "locationPermissionsCallback");
             } else {
                 call.reject("Permission denied.", "NOT_AUTHORIZED");
             }
@@ -159,19 +162,12 @@ public class BackgroundGeolocation extends Plugin {
         );
     }
 
-    @Override
-    protected void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (callPendingPermissions == null) {
+    @PermissionCallback
+    private void locationPermissionsCallback(PluginCall call) {
+        
+        if (!getPermissionState("location").equals("granted")) {
+            call.reject("User denied location permission", "NOT_AUTHORIZED");
             return;
-        }
-        PluginCall call = callPendingPermissions;
-        callPendingPermissions = null;
-        for (int result : grantResults) {
-            if (result == PackageManager.PERMISSION_DENIED) {
-                call.reject("User denied location permission", "NOT_AUTHORIZED");
-                return;
-            }
         }
         if (call.getBoolean("stale", false)) {
             fetchLastLocation(call);
@@ -192,9 +188,9 @@ public class BackgroundGeolocation extends Plugin {
             return;
         }
         service.removeWatcher(callbackId);
-        PluginCall savedCall = bridge.getSavedCall(callbackId);
+        PluginCall savedCall = getBridge().getSavedCall(callbackId);
         if (savedCall != null) {
-            savedCall.release(bridge);
+            savedCall.release(getBridge());
         }
         call.resolve();
     }
@@ -209,20 +205,18 @@ public class BackgroundGeolocation extends Plugin {
     }
 
     // Checks if device-wide location services are disabled
-    private static Boolean isLocationEnabled(Context context)
-    {
+    private static Boolean isLocationEnabled(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             return lm != null && lm.isLocationEnabled();
         } else {
-            return  (
+            return (
                     Settings.Secure.getInt(
                             context.getContentResolver(),
                             Settings.Secure.LOCATION_MODE,
                             Settings.Secure.LOCATION_MODE_OFF
                     ) != Settings.Secure.LOCATION_MODE_OFF
             );
-
         }
     }
 
@@ -254,7 +248,7 @@ public class BackgroundGeolocation extends Plugin {
         @Override
         public void onReceive(Context context, Intent intent) {
             String id = intent.getStringExtra("id");
-            PluginCall call = bridge.getSavedCall(id);
+            PluginCall call = getBridge().getSavedCall(id);
             if (call == null) {
                 return;
             }
@@ -333,7 +327,7 @@ public class BackgroundGeolocation extends Plugin {
     @Override
     protected void handleOnResume() {
         if (service != null) {
-            if (stoppedWithoutPermissions && hasRequiredPermissions()) {
+            if (stoppedWithoutPermissions && getPermissionState("location").equals("granted")) {
                 service.onPermissionsGranted();
             }
         }
@@ -342,7 +336,7 @@ public class BackgroundGeolocation extends Plugin {
 
     @Override
     protected void handleOnPause() {
-        stoppedWithoutPermissions = !hasRequiredPermissions();
+        stoppedWithoutPermissions = !getPermissionState("location").equals("granted");
         super.handleOnPause();
     }
 
