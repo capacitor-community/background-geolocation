@@ -97,8 +97,8 @@ public class BackgroundGeolocation extends Plugin {
             Notification.Builder builder = new Notification.Builder(getContext())
                     .setContentTitle(
                             call.getString(
-                                    "backgroundTitle",
-                                    "Using your location"
+                                "backgroundTitle",
+                                "Using your location"
                             )
                     )
                     .setContentText(backgroundMessage)
