@@ -214,6 +214,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.24
+- Avoid crash introduced in v1.2.23.
+
 ### v1.2.23
 - Perhaps make location updates more persistent on Android, see #137.
 
