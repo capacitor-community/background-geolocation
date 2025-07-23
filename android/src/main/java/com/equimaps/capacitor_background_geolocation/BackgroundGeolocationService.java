@@ -2,21 +2,14 @@ package com.equimaps.capacitor_background_geolocation;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
-import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 
 import com.getcapacitor.Logger;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-
 import java.util.HashSet;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -33,14 +26,14 @@ public class BackgroundGeolocationService extends Service {
     // Must be unique for this application.
     private static final int NOTIFICATION_ID = 28351;
 
-    private class Watcher {
+    private static class Watcher {
         public String id;
-        public FusedLocationProviderClient client;
-        public LocationRequest locationRequest;
-        public LocationCallback locationCallback;
+        public LocationManager client;
+        public float distanceFilter;
+        public LocationListener locationCallback;
         public Notification backgroundNotification;
     }
-    private HashSet<Watcher> watchers = new HashSet<Watcher>();
+    private HashSet<Watcher> watchers = new HashSet<>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -59,7 +52,7 @@ public class BackgroundGeolocationService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         for (Watcher watcher : watchers) {
-            watcher.client.removeLocationUpdates(watcher.locationCallback);
+            watcher.client.removeUpdates(watcher.locationCallback);
         }
         watchers = new HashSet<Watcher>();
         stopSelf();
@@ -82,39 +75,22 @@ public class BackgroundGeolocationService extends Service {
                 Notification backgroundNotification,
                 float distanceFilter
         ) {
-            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(
-                    BackgroundGeolocationService.this
-            );
-            LocationRequest locationRequest = new LocationRequest();
-            locationRequest.setMaxWaitTime(1000);
-            locationRequest.setInterval(1000);
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setSmallestDisplacement(distanceFilter);
+            LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-            LocationCallback callback = new LocationCallback(){
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    Location location = locationResult.getLastLocation();
-                    Intent intent = new Intent(ACTION_BROADCAST);
-                    intent.putExtra("location", location);
-                    intent.putExtra("id", id);
-                    LocalBroadcastManager.getInstance(
-                            getApplicationContext()
-                    ).sendBroadcast(intent);
-                }
-                @Override
-                public void onLocationAvailability(LocationAvailability availability) {
-                    if (!availability.isLocationAvailable()) {
-                        Logger.debug("Location not available");
-                    }
-                }
+            LocationListener listener = location -> {
+                Intent intent = new Intent(ACTION_BROADCAST);
+                intent.putExtra("location", location);
+                intent.putExtra("id", id);
+                LocalBroadcastManager.getInstance(
+                        getApplicationContext()
+                ).sendBroadcast(intent);
             };
 
             Watcher watcher = new Watcher();
             watcher.id = id;
-            watcher.client = client;
-            watcher.locationRequest = locationRequest;
-            watcher.locationCallback = callback;
+            watcher.client = locationManager;
+            watcher.distanceFilter = distanceFilter;
+            watcher.locationCallback = listener;
             watcher.backgroundNotification = backgroundNotification;
             watchers.add(watcher);
 
@@ -123,9 +99,10 @@ public class BackgroundGeolocationService extends Service {
             // we simply ignore the exception.
             try {
                 watcher.client.requestLocationUpdates(
-                        watcher.locationRequest,
-                        watcher.locationCallback,
-                        null
+                        LocationManager.GPS_PROVIDER,
+                        1000,
+                        watcher.distanceFilter,
+                        watcher.locationCallback
                 );
             } catch (SecurityException ignore) {}
 
@@ -150,7 +127,7 @@ public class BackgroundGeolocationService extends Service {
         void removeWatcher(String id) {
             for (Watcher watcher : watchers) {
                 if (watcher.id.equals(id)) {
-                    watcher.client.removeLocationUpdates(watcher.locationCallback);
+                    watcher.client.removeUpdates(watcher.locationCallback);
                     watchers.remove(watcher);
                     if (getNotification() == null) {
                         stopForeground(true);
@@ -164,12 +141,15 @@ public class BackgroundGeolocationService extends Service {
             // If permissions were granted while the app was in the background, for example in
             // the Settings app, the watchers need restarting.
             for (Watcher watcher : watchers) {
-                watcher.client.removeLocationUpdates(watcher.locationCallback);
-                watcher.client.requestLocationUpdates(
-                        watcher.locationRequest,
-                        watcher.locationCallback,
-                        null
-                );
+                watcher.client.removeUpdates(watcher.locationCallback);
+                try {
+                    watcher.client.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                1000,
+                                watcher.distanceFilter,
+                                watcher.locationCallback
+                        );
+                } catch (SecurityException ignore) { }
             }
         }
 
