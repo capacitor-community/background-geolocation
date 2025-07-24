@@ -56,18 +56,9 @@ public class BackgroundGeolocationService extends Service {
         for (Watcher watcher : watchers) {
             watcher.client.removeLocationUpdates(watcher.locationCallback);
         }
-        watchers = new HashSet<Watcher>();
+        watchers = new HashSet<>();
         stopSelf();
         return false;
-    }
-
-    Notification getNotification() {
-        for (Watcher watcher : watchers) {
-            if (watcher.backgroundNotification != null) {
-                return watcher.backgroundNotification;
-            }
-        }
-        return null;
     }
 
     // Handles requests from the activity.
@@ -147,11 +138,11 @@ public class BackgroundGeolocationService extends Service {
                 if (watcher.id.equals(id)) {
                     watcher.client.removeLocationUpdates(watcher.locationCallback);
                     watchers.remove(watcher);
-                    if (getNotification() == null) {
-                        stopForeground(true);
-                    }
-                    return;
+                    break;
                 }
+            }
+            if (watchers.isEmpty()) {
+                stopService();
             }
         }
 
@@ -169,7 +160,8 @@ public class BackgroundGeolocationService extends Service {
         }
 
         void stopService() {
-            BackgroundGeolocationService.this.stopSelf();
+            stopForeground(true);
+            stopSelf();
         }
     }
 }
