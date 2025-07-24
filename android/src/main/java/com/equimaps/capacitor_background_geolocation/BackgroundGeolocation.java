@@ -113,72 +113,6 @@ public class BackgroundGeolocation extends Plugin {
         });
     }
 
-    private CompletableFuture<BackgroundGeolocationService.LocalBinder> getServiceConnection() {
-        if (serviceConnectionFuture != null && !serviceConnectionFuture.isCompletedExceptionally()) {
-            return serviceConnectionFuture;
-        }
-
-        serviceConnectionFuture = new CompletableFuture<>();
-
-        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.getContext().startForegroundService(serviceIntent);
-        } else {
-            this.getContext().startService(serviceIntent);
-        }
-
-        this.getContext().bindService(
-                serviceIntent,
-                new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder binder) {
-                        serviceConnectionFuture.complete((BackgroundGeolocationService.LocalBinder) binder);
-                    }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        serviceConnectionFuture = null;
-                    }
-                },
-                Context.BIND_AUTO_CREATE
-        );
-
-        return serviceConnectionFuture;
-    }
-
-    private CompletableFuture<Void> requestLocationPermissions(PluginCall call) {
-        String futureKey = call.getCallbackId();
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        permissionFutures.put(futureKey, future);
-
-        requestPermissionForAlias("location", call, "locationPermissionsCallback");
-
-        return future;
-    }
-
-    @PermissionCallback
-    private void locationPermissionsCallback(PluginCall call) {
-        String futureKey = call.getCallbackId();
-        CompletableFuture<Void> future = permissionFutures.remove(futureKey);
-        if (future == null) {
-            return;
-        }
-
-        if (getPermissionState("location") != PermissionState.GRANTED) {
-            future.completeExceptionally(new SecurityException("User denied location permission"));
-            return;
-        }
-
-        getServiceConnection().thenAccept(service -> {
-            service.onPermissionsGranted();
-            // The handleOnResume method will now be called, and we don't need it to call
-            // service.onPermissionsGranted again so we reset this flag.
-            stoppedWithoutPermissions = false;
-        });
-
-        future.complete(null);
-    }
-
     private Notification createBackgroundNotification(PluginCall call) {
         String backgroundMessage = call.getString("backgroundMessage", "");
 
@@ -243,6 +177,72 @@ public class BackgroundGeolocation extends Plugin {
         }
 
         return builder.build();
+    }
+
+    private CompletableFuture<BackgroundGeolocationService.LocalBinder> getServiceConnection() {
+        if (serviceConnectionFuture != null && !serviceConnectionFuture.isCompletedExceptionally()) {
+            return serviceConnectionFuture;
+        }
+
+        serviceConnectionFuture = new CompletableFuture<>();
+
+        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.getContext().startForegroundService(serviceIntent);
+        } else {
+            this.getContext().startService(serviceIntent);
+        }
+
+        this.getContext().bindService(
+                serviceIntent,
+                new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder binder) {
+                        serviceConnectionFuture.complete((BackgroundGeolocationService.LocalBinder) binder);
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        serviceConnectionFuture = null;
+                    }
+                },
+                Context.BIND_AUTO_CREATE
+        );
+
+        return serviceConnectionFuture;
+    }
+
+    private CompletableFuture<Void> requestLocationPermissions(PluginCall call) {
+        String futureKey = call.getCallbackId();
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        permissionFutures.put(futureKey, future);
+
+        requestPermissionForAlias("location", call, "locationPermissionsCallback");
+
+        return future;
+    }
+
+    @PermissionCallback
+    private void locationPermissionsCallback(PluginCall call) {
+        String futureKey = call.getCallbackId();
+        CompletableFuture<Void> future = permissionFutures.remove(futureKey);
+        if (future == null) {
+            return;
+        }
+
+        if (getPermissionState("location") != PermissionState.GRANTED) {
+            future.completeExceptionally(new SecurityException("User denied location permission"));
+            return;
+        }
+
+        getServiceConnection().thenAccept(service -> {
+            service.onPermissionsGranted();
+            // The handleOnResume method will now be called, and we don't need it to call
+            // service.onPermissionsGranted again so we reset this flag.
+            stoppedWithoutPermissions = false;
+        });
+
+        future.complete(null);
     }
 
     @PluginMethod()
