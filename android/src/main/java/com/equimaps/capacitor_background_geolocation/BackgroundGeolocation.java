@@ -179,38 +179,6 @@ public class BackgroundGeolocation extends Plugin {
         return builder.build();
     }
 
-    private CompletableFuture<BackgroundGeolocationService.LocalBinder> getServiceConnection() {
-        if (serviceConnectionFuture != null && !serviceConnectionFuture.isCompletedExceptionally()) {
-            return serviceConnectionFuture;
-        }
-
-        serviceConnectionFuture = new CompletableFuture<>();
-
-        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.getContext().startForegroundService(serviceIntent);
-        } else {
-            this.getContext().startService(serviceIntent);
-        }
-
-        this.getContext().bindService(
-                serviceIntent,
-                new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder binder) {
-                        serviceConnectionFuture.complete((BackgroundGeolocationService.LocalBinder) binder);
-                    }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        serviceConnectionFuture = null;
-                    }
-                },
-                Context.BIND_AUTO_CREATE
-        );
-
-        return serviceConnectionFuture;
-    }
 
     private CompletableFuture<Void> requestLocationPermissions(PluginCall call) {
         String futureKey = call.getCallbackId();
@@ -374,6 +342,39 @@ public class BackgroundGeolocation extends Plugin {
                 new ServiceReceiver(),
                 new IntentFilter(BackgroundGeolocationService.ACTION_BROADCAST)
         );
+    }
+
+    private CompletableFuture<BackgroundGeolocationService.LocalBinder> getServiceConnection() {
+        if (serviceConnectionFuture != null && !serviceConnectionFuture.isCompletedExceptionally()) {
+            return serviceConnectionFuture;
+        }
+
+        serviceConnectionFuture = new CompletableFuture<>();
+
+        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.getContext().startForegroundService(serviceIntent);
+        } else {
+            this.getContext().startService(serviceIntent);
+        }
+
+        this.getContext().bindService(
+                serviceIntent,
+                new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder binder) {
+                        serviceConnectionFuture.complete((BackgroundGeolocationService.LocalBinder) binder);
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        serviceConnectionFuture = null;
+                    }
+                },
+                Context.BIND_AUTO_CREATE
+        );
+
+        return serviceConnectionFuture;
     }
 
     @Override
