@@ -59,6 +59,21 @@ public class BackgroundGeolocationService extends Service {
         return false;
     }
 
+    private void requestLocationUpdates(Watcher watcher) {
+        try {
+            watcher.client.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    1000,
+                    watcher.distanceFilter,
+                    watcher.locationCallback
+            );
+        } catch (SecurityException ignore) { 
+            // According to Android Studio, this method can throw a Security Exception if
+            // permissions are not yet granted. Rather than check the permissions, which is fiddly,
+            // we simply ignore the exception.
+        }
+    }
+
     Notification getNotification() {
         for (Watcher watcher : watchers) {
             if (watcher.backgroundNotification != null) {
@@ -94,17 +109,7 @@ public class BackgroundGeolocationService extends Service {
             watcher.backgroundNotification = backgroundNotification;
             watchers.add(watcher);
 
-            // According to Android Studio, this method can throw a Security Exception if
-            // permissions are not yet granted. Rather than check the permissions, which is fiddly,
-            // we simply ignore the exception.
-            try {
-                watcher.client.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        1000,
-                        watcher.distanceFilter,
-                        watcher.locationCallback
-                );
-            } catch (SecurityException ignore) {}
+            requestLocationUpdates(watcher);
 
             // Promote the service to the foreground if necessary.
             // Ideally we would only call 'startForeground' if the service is not already
@@ -142,14 +147,7 @@ public class BackgroundGeolocationService extends Service {
             // the Settings app, the watchers need restarting.
             for (Watcher watcher : watchers) {
                 watcher.client.removeUpdates(watcher.locationCallback);
-                try {
-                    watcher.client.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                1000,
-                                watcher.distanceFilter,
-                                watcher.locationCallback
-                        );
-                } catch (SecurityException ignore) { }
+                requestLocationUpdates(watcher);
             }
         }
 
