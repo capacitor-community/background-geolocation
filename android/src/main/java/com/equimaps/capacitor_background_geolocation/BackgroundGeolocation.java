@@ -104,8 +104,8 @@ public class BackgroundGeolocation extends Plugin {
         if (call.getBoolean("stale", false)) {
             fetchLastLocation(call);
         }
-        getServiceConnection().thenAccept(serviceBinder -> {
-            serviceBinder.addWatcher(
+        getServiceConnection().thenAccept(service -> {
+            service.addWatcher(
                     call.getCallbackId(),
                     createBackgroundNotification(call),
                     call.getFloat("distanceFilter", 0f)
@@ -169,8 +169,8 @@ public class BackgroundGeolocation extends Plugin {
             return;
         }
 
-        getServiceConnection().thenAccept(serviceBinder -> {
-            serviceBinder.onPermissionsGranted();
+        getServiceConnection().thenAccept(service -> {
+            service.onPermissionsGranted();
             // The handleOnResume method will now be called, and we don't need it to call
             // service.onPermissionsGranted again so we reset this flag.
             stoppedWithoutPermissions = false;
@@ -253,8 +253,8 @@ public class BackgroundGeolocation extends Plugin {
             return;
         }
 
-        getServiceConnection().thenAccept(serviceBinder -> {
-            serviceBinder.removeWatcher(callbackId);
+        getServiceConnection().thenAccept(service -> {
+            service.removeWatcher(callbackId);
             PluginCall savedCall = getBridge().getSavedCall(callbackId);
             if (savedCall != null) {
                 savedCall.release(getBridge());
