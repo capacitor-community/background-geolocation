@@ -121,15 +121,13 @@ public class BackgroundGeolocationService extends Service {
             // in API level 29 and seems to behave weirdly, as reported in #120. However,
             // it appears that 'startForeground' is idempotent, so we just call it repeatedly
             // each time a background watcher is added.
-            if (backgroundNotification != null) {
-                try {
-                    // This method has been known to fail due to weird
-                    // permission bugs, so we prevent any exceptions from
-                    // crashing the app. See issue #86.
-                    startForeground(NOTIFICATION_ID, backgroundNotification);
-                } catch (Exception exception) {
-                    Logger.error("Failed to foreground service", exception);
-                }
+            try {
+                // This method has been known to fail due to weird
+                // permission bugs, so we prevent any exceptions from
+                // crashing the app. See issue #86.
+                startForeground(NOTIFICATION_ID, backgroundNotification);
+            } catch (Exception exception) {
+                Logger.error("Failed to foreground service", exception);
             }
         }
 
