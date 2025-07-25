@@ -214,7 +214,7 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
-### v1.2.17
+### v1.2.25
 - Add support for Capacitor v7.
 
 ### v1.2.24
