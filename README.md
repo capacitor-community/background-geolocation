@@ -214,6 +214,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.17
+- Add support for Capacitor v7.
+
 ### v1.2.24
 - Avoid crash introduced in v1.2.23.
 
@@ -233,31 +236,31 @@ Configration specific to Android can be made in `strings.xml`:
 - Always show the notification when a background watcher exists, improving the reliability of location updates on Android.
 
 ### v1.2.17
-- Adds support for Capacitor v6.
+- Add support for Capacitor v6.
 
 ### v1.2.16
-- Fixes background location updates for Android 14.
+- Fix background location updates for Android 14.
 
 ### v1.2.14
-- Adds support for Capacitor v5.
+- Add support for Capacitor v5.
 
 ### v1.2.3
-- Adds support for Capacitor v4.
+- Add support for Capacitor v4.
 
 ### v1.2.2
-- Prevents location updates from halting on iOS due to extended inactivity.
+- Prevent location updates from halting on iOS due to extended inactivity.
 
 ### v1.2.1
-- Fixes background location updates for some devices running Android 12.
+- Fix background location updates for some devices running Android 12.
 
 ### v1.2.0
 - On iOS, the status bar now turns blue whilst the location is being watched in the background. This provides the user a straightforward way to return to the app.
 
 ### v1.0.4
-- Adds the `ACCESS_COARSE_LOCATION` permission. This is required for apps that target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
+- Add the `ACCESS_COARSE_LOCATION` permission. This is required for apps that target Android 12 (API level 31). A preceeding example shows how to add this permission to your app's manifest.
 
 ### v1.0.0
 - BREAKING: `addWatcher` now returns a Promise that resolves to the callback ID, rather than the callback ID itself.
 - BREAKING: The plugin is imported via Capacitor's `registerPlugin` function, rather than from the `Plugins` object.
 - BREAKING: Drops support for iOS v11 and Capacitor v2.
-- Adds support for Capacitor v3.
+- Add support for Capacitor v3.
