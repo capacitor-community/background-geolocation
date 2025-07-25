@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -30,11 +29,13 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONObject;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @CapacitorPlugin(
         name = "BackgroundGeolocation",
@@ -49,8 +50,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
         }
 )
 public class BackgroundGeolocation extends Plugin {
-    private BackgroundGeolocationService.LocalBinder service = null;
     private Boolean stoppedWithoutPermissions = false;
+
+    private CompletableFuture<BackgroundGeolocationService.LocalBinder> serviceConnectionFuture;
+    private final ConcurrentHashMap<String, CompletableFuture<Void>> permissionFutures = new ConcurrentHashMap<>();
 
     private void fetchLastLocation(PluginCall call) {
         try {
@@ -58,12 +61,9 @@ public class BackgroundGeolocation extends Plugin {
                     getContext()
             ).getLastLocation().addOnSuccessListener(
                     getActivity(),
-                    new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                call.resolve(formatLocation(location));
-                            }
+                    location -> {
+                        if (location != null) {
+                            call.resolve(formatLocation(location));
                         }
                     }
             );
@@ -72,113 +72,145 @@ public class BackgroundGeolocation extends Plugin {
 
     @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
     public void addWatcher(final PluginCall call) {
-        if (service == null) {
-            call.reject("Service not running.");
+
+        if (getPermissionState("location") != PermissionState.GRANTED && !call.getBoolean("requestPermissions", true)) {
+            call.reject("User denied location permission", "NOT_AUTHORIZED");
             return;
         }
-        call.setKeepAlive(true);
 
-        if (getPermissionState("location") != PermissionState.GRANTED) {
-            if (call.getBoolean("requestPermissions", true)) {
-                requestPermissionForAlias("location", call, "locationPermissionsCallback");
-            } else {
-                call.reject("Permission denied.", "NOT_AUTHORIZED");
-            }
-        } else if (!isLocationEnabled(getContext())) {
-            call.reject("Location services disabled.", "NOT_AUTHORIZED");
+        if (getPermissionState("location") != PermissionState.GRANTED && call.getBoolean("requestPermissions", true)) {
+            call.setKeepAlive(true);
+            requestLocationPermissions(call).thenRun(() -> {
+                proceedWithWatcher(call);
+            }).exceptionally(throwable -> {
+                call.reject("User denied location permission", "NOT_AUTHORIZED");
+                return null;
+            });
+            return;
         }
+
+        // location permission granted.
+        if (!isLocationEnabled(getContext())) {
+            call.reject("Location services disabled.", "NOT_AUTHORIZED");
+            return;
+        }
+
+        // Everything is OK, continuing to adding a watcher
+        call.setKeepAlive(true);
+        proceedWithWatcher(call);
+    }
+
+    private void proceedWithWatcher(PluginCall call) {
         if (call.getBoolean("stale", false)) {
             fetchLastLocation(call);
         }
-        Notification backgroundNotification = null;
-        String backgroundMessage = call.getString("backgroundMessage");
+        getServiceConnection().thenAccept(service -> {
+            service.addWatcher(
+                    call.getCallbackId(),
+                    createBackgroundNotification(call),
+                    call.getFloat("distanceFilter", 0f)
+            );
+        });
+    }
 
-        if (backgroundMessage != null) {
-            Notification.Builder builder = new Notification.Builder(getContext())
-                    .setContentTitle(
-                            call.getString(
+    private Notification createBackgroundNotification(PluginCall call) {
+        String backgroundMessage = call.getString("backgroundMessage", "");
+
+        Notification.Builder builder = new Notification.Builder(getContext())
+                .setContentTitle(
+                        call.getString(
                                 "backgroundTitle",
                                 "Using your location"
-                            )
-                    )
-                    .setContentText(backgroundMessage)
-                    .setOngoing(true)
-                    .setPriority(Notification.PRIORITY_HIGH)
-                    .setWhen(System.currentTimeMillis());
-
-            try {
-                String name = getAppString(
-                        "capacitor_background_geolocation_notification_icon",
-                        "mipmap/ic_launcher"
-                );
-                String[] parts = name.split("/");
-                // It is actually necessary to set a valid icon for the notification to behave
-                // correctly when tapped. If there is no icon specified, tapping it will open the
-                // app's settings, rather than bringing the application to the foreground.
-                builder.setSmallIcon(
-                        getAppResourceIdentifier(parts[1], parts[0])
-                );
-            } catch (Exception e) {
-                Logger.error("Could not set notification icon", e);
-            }
-
-            try {
-                String color = getAppString(
-                        "capacitor_background_geolocation_notification_color",
-                        null
-                );
-                if (color != null) {
-                    builder.setColor(Color.parseColor(color));
-                }
-            } catch (Exception e) {
-                Logger.error("Could not set notification color", e);
-            }
-
-            Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
-                    getContext().getPackageName()
-            );
-            if (launchIntent != null) {
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                builder.setContentIntent(
-                        PendingIntent.getActivity(
-                                getContext(),
-                                0,
-                                launchIntent,
-                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
                         )
-                );
-            }
+                )
+                .setContentText(backgroundMessage)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setWhen(System.currentTimeMillis());
 
-            // Set the Channel ID for Android O.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
-            }
-
-            backgroundNotification = builder.build();
+        try {
+            String name = getAppString(
+                    "capacitor_background_geolocation_notification_icon",
+                    "mipmap/ic_launcher"
+            );
+            String[] parts = name.split("/");
+            // It is actually necessary to set a valid icon for the notification to behave
+            // correctly when tapped. If there is no icon specified, tapping it will open the
+            // app's settings, rather than bringing the application to the foreground.
+            builder.setSmallIcon(
+                    getAppResourceIdentifier(parts[1], parts[0])
+            );
+        } catch (Exception e) {
+            Logger.error("Could not set notification icon", e);
         }
-        service.addWatcher(
-                call.getCallbackId(),
-                backgroundNotification,
-                call.getFloat("distanceFilter", 0f)
+
+        try {
+            String color = getAppString(
+                    "capacitor_background_geolocation_notification_color",
+                    null
+            );
+            if (color != null) {
+                builder.setColor(Color.parseColor(color));
+            }
+        } catch (Exception e) {
+            Logger.error("Could not set notification color", e);
+        }
+
+        Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
+                getContext().getPackageName()
         );
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            builder.setContentIntent(
+                    PendingIntent.getActivity(
+                            getContext(),
+                            0,
+                            launchIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    )
+            );
+        }
+
+        // Set the Channel ID for Android O.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
+        }
+
+        return builder.build();
+    }
+
+
+    private CompletableFuture<Void> requestLocationPermissions(PluginCall call) {
+        String futureKey = call.getCallbackId();
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        permissionFutures.put(futureKey, future);
+
+        requestPermissionForAlias("location", call, "locationPermissionsCallback");
+
+        return future;
     }
 
     @PermissionCallback
     private void locationPermissionsCallback(PluginCall call) {
-
-        if (getPermissionState("location") != PermissionState.GRANTED) {
-            call.reject("User denied location permission", "NOT_AUTHORIZED");
+        String futureKey = call.getCallbackId();
+        CompletableFuture<Void> future = permissionFutures.remove(futureKey);
+        if (future == null) {
             return;
         }
-        if (call.getBoolean("stale", false)) {
-            fetchLastLocation(call);
+
+        if (getPermissionState("location") != PermissionState.GRANTED) {
+            future.completeExceptionally(new SecurityException("User denied location permission"));
+            return;
         }
-        if (service != null) {
+
+        getServiceConnection().thenAccept(service -> {
             service.onPermissionsGranted();
             // The handleOnResume method will now be called, and we don't need it to call
             // service.onPermissionsGranted again so we reset this flag.
             stoppedWithoutPermissions = false;
-        }
+        });
+
+        future.complete(null);
     }
 
     @PluginMethod()
@@ -188,12 +220,18 @@ public class BackgroundGeolocation extends Plugin {
             call.reject("Missing id.");
             return;
         }
-        service.removeWatcher(callbackId);
-        PluginCall savedCall = getBridge().getSavedCall(callbackId);
-        if (savedCall != null) {
-            savedCall.release(getBridge());
-        }
-        call.resolve();
+
+        getServiceConnection().thenAccept(service -> {
+            service.removeWatcher(callbackId);
+            PluginCall savedCall = getBridge().getSavedCall(callbackId);
+            if (savedCall != null) {
+                savedCall.release(getBridge());
+            }
+            call.resolve();
+        }).exceptionally(throwable -> {
+            call.reject("Service connection failed: " + throwable.getMessage());
+            return null;
+        });
     }
 
     @PluginMethod()
@@ -300,33 +338,50 @@ public class BackgroundGeolocation extends Plugin {
             manager.createNotificationChannel(channel);
         }
 
-        this.getContext().bindService(
-                new Intent(this.getContext(), BackgroundGeolocationService.class),
-                new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder binder) {
-                        BackgroundGeolocation.this.service = (BackgroundGeolocationService.LocalBinder) binder;
-                    }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                    }
-                },
-                Context.BIND_AUTO_CREATE
-        );
-
         LocalBroadcastManager.getInstance(this.getContext()).registerReceiver(
                 new ServiceReceiver(),
                 new IntentFilter(BackgroundGeolocationService.ACTION_BROADCAST)
         );
     }
 
+    private CompletableFuture<BackgroundGeolocationService.LocalBinder> getServiceConnection() {
+        if (serviceConnectionFuture != null && !serviceConnectionFuture.isCompletedExceptionally()) {
+            return serviceConnectionFuture;
+        }
+
+        serviceConnectionFuture = new CompletableFuture<>();
+
+        Intent serviceIntent = new Intent(this.getContext(), BackgroundGeolocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.getContext().startForegroundService(serviceIntent);
+        } else {
+            this.getContext().startService(serviceIntent);
+        }
+
+        this.getContext().bindService(
+                serviceIntent,
+                new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder binder) {
+                        serviceConnectionFuture.complete((BackgroundGeolocationService.LocalBinder) binder);
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        serviceConnectionFuture = null;
+                    }
+                },
+                Context.BIND_AUTO_CREATE
+        );
+
+        return serviceConnectionFuture;
+    }
+
     @Override
     protected void handleOnResume() {
-        if (service != null) {
-            if (stoppedWithoutPermissions && getPermissionState("location") == PermissionState.GRANTED) {
-                service.onPermissionsGranted();
-            }
+        if (serviceConnectionFuture != null &&
+            stoppedWithoutPermissions && getPermissionState("location") == PermissionState.GRANTED) {
+            serviceConnectionFuture.thenAccept(BackgroundGeolocationService.LocalBinder::onPermissionsGranted);
         }
         super.handleOnResume();
     }
@@ -339,9 +394,17 @@ public class BackgroundGeolocation extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
-        if (service != null) {
-            service.stopService();
+        if (serviceConnectionFuture != null) {
+            serviceConnectionFuture.thenAccept(BackgroundGeolocationService.LocalBinder::stopService);
         }
+
+        permissionFutures.values().forEach(future -> {
+            if (!future.isDone()) {
+                future.cancel(true);
+            }
+        });
+        permissionFutures.clear();
+
         super.handleOnDestroy();
     }
 }
