@@ -1,6 +1,6 @@
 /*jslint browser, null, devel */
-/*global capacitorExports, capacitorLocalNotifications */
-const {registerPlugin} = capacitorExports;
+import {registerPlugin} from "@capacitor/core";
+import {LocalNotifications} from "@capacitor/local-notifications";
 const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
 const started = Date.now();
@@ -47,7 +47,7 @@ function log_location(location, watcher_ID) {
     );
 }
 
-function add_watcher(background) {
+window.add_watcher = function add_watcher(background) {
     let id;
     BackgroundGeolocation.addWatcher(
         Object.assign({
@@ -140,7 +140,7 @@ function make_guess(timeout) {
     });
 }
 
-function guess(timeout) {
+window.guess = function guess(timeout) {
     return make_guess(timeout).then(function (location) {
         return (
             location === null
@@ -156,8 +156,8 @@ function guess(timeout) {
     });
 }
 
-function request_permissions() {
-    capacitorLocalNotifications.LocalNotifications.requestPermissions().then(
+window.request_permissions = function request_permissions() {
+    LocalNotifications.requestPermissions().then(
         function (status) {
             log_for_watcher("Notification permissions " + status.display);
         }

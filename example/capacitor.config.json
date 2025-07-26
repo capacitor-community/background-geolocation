@@ -3,5 +3,5 @@
   "appName": "example",
   "android": {"useLegacyBridge": true},
   "npmClient": "npm",
-  "webDir": "www"
+  "webDir": "dist"
 }
