@@ -37,6 +37,8 @@ export interface WatcherOptions {
      * @default 0
      */
     distanceFilter?: number;
+    interval?: number;
+    maxWaitTime?: number;
 }
 
 /**
