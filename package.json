@@ -19,15 +19,13 @@
         "android/settings.gradle",
         "android/src/main/",
         "definitions.d.ts",
-        "ios/Plugin/Info.plist",
-        "ios/Plugin/Plugin.*",
-        "ios/Plugin/Swift/Plugin.swift",
+        "ios/Plugin/",
         "ios/Podfile*"
     ],
     "devDependencies": {
-        "@capacitor/android": "^7.0.0",
-        "@capacitor/core": "^7.0.0",
-        "@capacitor/ios": "^7.0.0"
+        "@capacitor/android": "^8.0.0",
+        "@capacitor/core": "^8.0.0",
+        "@capacitor/ios": "^8.0.0"
     },
     "peerDependencies": {
         "@capacitor/core": ">=3.0.0"

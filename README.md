@@ -214,6 +214,9 @@ Configration specific to Android can be made in `strings.xml`:
 
 ## Changelog
 
+### v1.2.27
+- Add support for Capacitor v8.
+
 ### v1.2.26
 - Add support for Swift Package Manager (SPM).
 
