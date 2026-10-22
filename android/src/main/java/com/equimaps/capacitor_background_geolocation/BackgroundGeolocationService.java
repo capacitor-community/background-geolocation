@@ -70,6 +70,17 @@ public class BackgroundGeolocationService extends Service {
         return null;
     }
 
+    private void promote(Notification notification) {
+        try {
+            // The 'startForeground' method has been known to fail due to weird
+            // permission bugs, so we prevent any exceptions from
+            // crashing the app. See issue #86.
+            startForeground(NOTIFICATION_ID, notification);
+        } catch (Exception exception) {
+            Logger.error("Failed to foreground service", exception);
+        }
+    }
+
     // Handles requests from the activity.
     public class LocalBinder extends Binder {
         void addWatcher(
@@ -131,14 +142,7 @@ public class BackgroundGeolocationService extends Service {
             // it appears that 'startForeground' is idempotent, so we just call it repeatedly
             // each time a background watcher is added.
             if (backgroundNotification != null) {
-                try {
-                    // This method has been known to fail due to weird
-                    // permission bugs, so we prevent any exceptions from
-                    // crashing the app. See issue #86.
-                    startForeground(NOTIFICATION_ID, backgroundNotification);
-                } catch (Exception exception) {
-                    Logger.error("Failed to foreground service", exception);
-                }
+                promote(backgroundNotification);
             }
         }
 
@@ -165,6 +169,14 @@ public class BackgroundGeolocationService extends Service {
                         watcher.locationCallback,
                         null
                 );
+            }
+
+            // From Android 14, a location foreground service can not be started
+            // without location permissions, so any earlier attempt to promote the
+            // service will have failed. See issue #153.
+            Notification notification = getNotification();
+            if (notification != null) {
+                promote(notification);
             }
         }
 
