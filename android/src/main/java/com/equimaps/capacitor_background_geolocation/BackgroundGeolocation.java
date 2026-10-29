@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -45,7 +44,14 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
                                 Manifest.permission.ACCESS_FINE_LOCATION
                         },
                         alias = "location"
+                ),
+                @Permission(
+                        strings = {
+                                Manifest.permission.POST_NOTIFICATIONS,
+                        },
+                        alias = "notifications"
                 )
+
         }
 )
 public class BackgroundGeolocation extends Plugin {
@@ -76,90 +82,106 @@ public class BackgroundGeolocation extends Plugin {
             call.reject("Service not running.");
             return;
         }
-        call.setKeepAlive(true);
-
-        if (getPermissionState("location") != PermissionState.GRANTED) {
-            if (call.getBoolean("requestPermissions", true)) {
-                requestPermissionForAlias("location", call, "locationPermissionsCallback");
-            } else {
-                call.reject("Permission denied.", "NOT_AUTHORIZED");
-            }
-        } else if (!isLocationEnabled(getContext())) {
-            call.reject("Location services disabled.", "NOT_AUTHORIZED");
+        if (getPermissionState("location") != PermissionState.GRANTED && !call.getBoolean("requestPermissions", true)) {
+            call.reject("Permission denied.", "NOT_AUTHORIZED");
+            return;
         }
+
+        if (getPermissionState("location") != PermissionState.GRANTED && call.getBoolean("requestPermissions", true)) {
+            call.setKeepAlive(true);
+            requestPermissionForAlias("location", call, "locationPermissionsCallback");
+            return;
+        }
+
+        if (!isLocationEnabled(getContext())) {
+            call.reject("Location services disabled.", "NOT_AUTHORIZED");
+            return;
+        }
+
+        call.setKeepAlive(true);
+        addWatcherAfterLocationPermissionGranted(call);
+    }
+
+    private Notification createNotification(PluginCall call) {
+        String backgroundMessage = call.getString("backgroundMessage");
+        if (backgroundMessage == null) {
+            return null;
+        }
+        Notification.Builder builder = new Notification.Builder(getContext())
+                .setContentTitle(
+                        call.getString(
+                                "backgroundTitle",
+                                "Using your location"
+                        )
+                )
+                .setContentText(backgroundMessage)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setWhen(System.currentTimeMillis());
+
+        try {
+            String name = getAppString(
+                    "capacitor_background_geolocation_notification_icon",
+                    "mipmap/ic_launcher"
+            );
+            String[] parts = name.split("/");
+            // It is actually necessary to set a valid icon for the notification to behave
+            // correctly when tapped. If there is no icon specified, tapping it will open the
+            // app's settings, rather than bringing the application to the foreground.
+            builder.setSmallIcon(
+                    getAppResourceIdentifier(parts[1], parts[0])
+            );
+        } catch (Exception e) {
+            Logger.error("Could not set notification icon", e);
+        }
+
+        try {
+            String color = getAppString(
+                    "capacitor_background_geolocation_notification_color",
+                    null
+            );
+            if (color != null) {
+                builder.setColor(Color.parseColor(color));
+            }
+        } catch (Exception e) {
+            Logger.error("Could not set notification color", e);
+        }
+
+        Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
+                getContext().getPackageName()
+        );
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            builder.setContentIntent(
+                    PendingIntent.getActivity(
+                            getContext(),
+                            0,
+                            launchIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    )
+            );
+        }
+
+        // Set the Channel ID for Android O.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
+        }
+
+        return builder.build();
+    }
+
+    private void addWatcherAfterLocationPermissionGranted(PluginCall call) {
         if (call.getBoolean("stale", false)) {
             fetchLastLocation(call);
         }
-        Notification backgroundNotification = null;
-        String backgroundMessage = call.getString("backgroundMessage");
-
-        if (backgroundMessage != null) {
-            Notification.Builder builder = new Notification.Builder(getContext())
-                    .setContentTitle(
-                            call.getString(
-                                "backgroundTitle",
-                                "Using your location"
-                            )
-                    )
-                    .setContentText(backgroundMessage)
-                    .setOngoing(true)
-                    .setPriority(Notification.PRIORITY_HIGH)
-                    .setWhen(System.currentTimeMillis());
-
-            try {
-                String name = getAppString(
-                        "capacitor_background_geolocation_notification_icon",
-                        "mipmap/ic_launcher"
-                );
-                String[] parts = name.split("/");
-                // It is actually necessary to set a valid icon for the notification to behave
-                // correctly when tapped. If there is no icon specified, tapping it will open the
-                // app's settings, rather than bringing the application to the foreground.
-                builder.setSmallIcon(
-                        getAppResourceIdentifier(parts[1], parts[0])
-                );
-            } catch (Exception e) {
-                Logger.error("Could not set notification icon", e);
-            }
-
-            try {
-                String color = getAppString(
-                        "capacitor_background_geolocation_notification_color",
-                        null
-                );
-                if (color != null) {
-                    builder.setColor(Color.parseColor(color));
-                }
-            } catch (Exception e) {
-                Logger.error("Could not set notification color", e);
-            }
-
-            Intent launchIntent = getContext().getPackageManager().getLaunchIntentForPackage(
-                    getContext().getPackageName()
-            );
-            if (launchIntent != null) {
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                builder.setContentIntent(
-                        PendingIntent.getActivity(
-                                getContext(),
-                                0,
-                                launchIntent,
-                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                        )
-                );
-            }
-
-            // Set the Channel ID for Android O.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder.setChannelId(BackgroundGeolocationService.class.getPackage().getName());
-            }
-
-            backgroundNotification = builder.build();
+        if (call.getString("backgroundMessage") != null && getPermissionState("notification") != PermissionState.GRANTED) {
+            requestPermissionForAlias("notifications", call, "notificationsPermissionsCallback");
+            return;
         }
         service.addWatcher(
-                call.getCallbackId(),
-                backgroundNotification,
-                call.getFloat("distanceFilter", 0f)
+            call.getCallbackId(),
+            createNotification(call),
+            call.getFloat("distanceFilter", 0f)
         );
     }
 
@@ -170,15 +192,22 @@ public class BackgroundGeolocation extends Plugin {
             call.reject("User denied location permission", "NOT_AUTHORIZED");
             return;
         }
-        if (call.getBoolean("stale", false)) {
-            fetchLastLocation(call);
-        }
         if (service != null) {
             service.onPermissionsGranted();
             // The handleOnResume method will now be called, and we don't need it to call
             // service.onPermissionsGranted again so we reset this flag.
             stoppedWithoutPermissions = false;
         }
+        addWatcherAfterLocationPermissionGranted(call);
+    }
+
+    @PermissionCallback
+    private void notificationsPermissionsCallback(PluginCall call) {
+        service.addWatcher(
+                call.getCallbackId(),
+                createNotification(call),
+                call.getFloat("distanceFilter", 0f)
+        );
     }
 
     @PluginMethod()
