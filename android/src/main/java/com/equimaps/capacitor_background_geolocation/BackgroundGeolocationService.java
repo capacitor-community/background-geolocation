@@ -17,7 +17,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -40,7 +40,8 @@ public class BackgroundGeolocationService extends Service {
         public LocationCallback locationCallback;
         public Notification backgroundNotification;
     }
-    private HashSet<Watcher> watchers = new HashSet<Watcher>();
+    // Insertion-ordered, so that the most recently added watcher is known.
+    private LinkedHashSet<Watcher> watchers = new LinkedHashSet<Watcher>();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,18 +57,21 @@ public class BackgroundGeolocationService extends Service {
         for (Watcher watcher : watchers) {
             watcher.client.removeLocationUpdates(watcher.locationCallback);
         }
-        watchers = new HashSet<Watcher>();
+        watchers = new LinkedHashSet<Watcher>();
         stopSelf();
         return false;
     }
 
+    // Returns the notification of the most recently added background watcher,
+    // which is the one being displayed.
     Notification getNotification() {
+        Notification notification = null;
         for (Watcher watcher : watchers) {
             if (watcher.backgroundNotification != null) {
-                return watcher.backgroundNotification;
+                notification = watcher.backgroundNotification;
             }
         }
-        return null;
+        return notification;
     }
 
     private void promote(Notification notification) {
@@ -151,8 +155,15 @@ public class BackgroundGeolocationService extends Service {
                 if (watcher.id.equals(id)) {
                     watcher.client.removeLocationUpdates(watcher.locationCallback);
                     watchers.remove(watcher);
-                    if (getNotification() == null) {
+                    // There is a single notification, last set by 'addWatcher'. If
+                    // it belonged to the removed watcher, it would otherwise keep
+                    // showing that watcher's text, so show a remaining watcher's
+                    // notification instead.
+                    Notification notification = getNotification();
+                    if (notification == null) {
                         stopForeground(true);
+                    } else {
+                        promote(notification);
                     }
                     return;
                 }
